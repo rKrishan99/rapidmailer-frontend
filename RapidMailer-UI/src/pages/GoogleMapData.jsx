@@ -1,4 +1,6 @@
 import React from "react";
+import ShowDataTable from "../components/ShowDataTable";
+import DownloadDataBlock from "../components/DownloadDataBlock";
 
 const GoogleMapData = () => {
   return (
@@ -15,6 +17,8 @@ const GoogleMapData = () => {
         </div>
         <button className="bg-[#1EAE98] flex items-center justify-center text-white px-8 py-1 rounded-lg cursor-pointer hover:bg-[#1eae7c]">Start</button>
       </div>
+      <ShowDataTable />
+      <DownloadDataBlock />
     </div>
   );
 };
