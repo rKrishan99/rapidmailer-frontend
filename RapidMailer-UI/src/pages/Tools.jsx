@@ -3,7 +3,7 @@ import ToolCards from '../components/ToolCards';
 
 const Tools = () => {
   return (
-    <div className=' flex flex-col gap-6 p-8'>
+    <div className=' flex flex-col gap-6 p-8 bg-[#233E8B] h-full'>
       <div className=''>
         <h1 className='text-2xl font-bold'>Tools</h1>
       </div>

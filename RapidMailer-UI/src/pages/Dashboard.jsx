@@ -2,7 +2,9 @@ import React from 'react'
 
 const Dashboard = () => {
   return (
-    <div>Dashboard</div>
+    <div className='bg-[#233E8B] h-full'>
+      
+    </div>
   )
 }
 

@@ -14,7 +14,7 @@ const ToolCards = () => {
             className="flex flex-col gap-2 justify-center items-center p-4 w-[200px] h-[200px] bg-[#f1f1f1] rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105"
           >
             <img className="w-[80px]" src={item.icon} alt="" />
-            <h1 className="text-center">{item.title}</h1>
+            <h1 className="text-center font-semibold">{item.title}</h1>
           </div>
         </div>
       ))}

@@ -1,15 +1,29 @@
-import React from "react";
+import React, { useContext } from "react";
 import { images } from "../assets/assets";
+import { SidebarExpandContext } from "../context/SidebarExpandContext";
 
 const Navbar = () => {
+  const { isExpand, setIsExpand } = useContext(SidebarExpandContext);
+
   return (
     <div className="flex items-center px-3 justify-between w-full h-[70px] bg-[#1EAE98]">
       <div className="flex gap-5">
-        <img
-          className="w-[40px] cursor-pointer"
-          src={images.burgerIcon}
-          alt=""
-        />
+        {isExpand ? (
+          <img
+            className="w-[40px] cursor-pointer"
+            src={images.burgerExpandIcon}
+            alt=""
+            onClick={() => setIsExpand(false)}
+          />
+        ) : (
+          <img
+            className="w-[40px] cursor-pointer"
+            src={images.burgerIcon}
+            alt=""
+            onClick={() => setIsExpand(true)}
+          />
+        )}
+
         <img className="w-[220px]" src={images.logo} alt="" />
       </div>
       <div>

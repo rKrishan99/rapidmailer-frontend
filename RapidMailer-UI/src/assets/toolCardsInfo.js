@@ -1,24 +1,27 @@
-import MapIcon from './map.svg'
+import MapIcon from './map.svg';
+import WebIcon from './web.svg';
+import ValidIcon from './valid.svg';
+import SendIcon from './send.svg';
 
 export const toolInfo = [
     {
         icon: MapIcon,
-        title: 'Collect data from Google Map',
+        title: 'Extract Emails from Google Maps',
         path: '/gmap-data'
     },
     {
-        icon: MapIcon,
-        title: 'Collect data from Web',
+        icon: WebIcon,
+        title: 'Extract Emails from Google Search',
         path: '/web-data'
     },
     {
-        icon: MapIcon,
-        title: 'Verify emails validity',
+        icon: ValidIcon,
+        title: 'Email Validation',
         path: '/verify-mails'
     },
     {
-        icon: MapIcon,
-        title: 'send bulk emails',
+        icon: SendIcon,
+        title: 'Bulk Email Sending',
         path: '/send-mails'
     }
 ];
