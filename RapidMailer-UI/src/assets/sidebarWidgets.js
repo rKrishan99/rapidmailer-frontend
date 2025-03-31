@@ -1,9 +1,10 @@
-import Dashbord from "./dashboard.svg";
+import toolIcon from "./tools.svg";
+
 
 export const sidebarContent = [
   {
     title: "Tools",
-    icon: Dashbord,
+    icon: toolIcon,
     path: "/tools"
   },
   
