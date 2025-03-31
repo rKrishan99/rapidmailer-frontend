@@ -15,7 +15,7 @@ const Home = () => {
       <div className="">
         <Sidebar />
       </div>
-      <div className="w-full">
+      <div className="w-full overflow-hidden">
         <Routes>
           <Route path="/dashbord" element={<Dashboard />} />
           <Route path="/tools" element={<Tools />} />

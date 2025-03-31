@@ -3,6 +3,7 @@ import DownloadDataBlock from "../components/DownloadDataBlock";
 import { GoogleMapDataContext } from "../context/MapDataContext";
 import StickyHeadTable from "../components/ShowMapDataTable";
 import PropagateLoader from "react-spinners/PropagateLoader";
+import { COLORS } from "../constants/theme";
 
 const GoogleMapData = () => {
   const { googleMapData, loading, fetchGoogleMapData, error } =
@@ -26,7 +27,7 @@ const GoogleMapData = () => {
   console.log("again at GoogleMapData:", googleMapData);
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-[#233E8B] h-full">
+    <div style={{ backgroundColor: COLORS.background }} className="flex flex-col gap-6 p-6 h-full">
       <h1 className="text-lg font-bold">Extract Data from Google Maps</h1>
       <div className="flex flex-row gap-12 mt-4  items-center">
         <div className="flex flex-row  items-center gap-4">

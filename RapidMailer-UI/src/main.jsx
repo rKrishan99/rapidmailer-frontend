@@ -5,13 +5,16 @@ import { BrowserRouter } from "react-router-dom";
 import { GoogleMapDataProvider } from "./context/MapDataContext.jsx";
 import { WebDataProvider } from "./context/WebDataContext.jsx";
 import { SidebarExpandProvider } from "./context/SidebarExpandContext.jsx";
+import { EmailsVerifyProvider } from "./context/EmailsVerifyContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <GoogleMapDataProvider>
       <WebDataProvider>
         <SidebarExpandProvider>
-          <App />
+          <EmailsVerifyProvider>
+            <App />
+          </EmailsVerifyProvider>
         </SidebarExpandProvider>
       </WebDataProvider>
     </GoogleMapDataProvider>
