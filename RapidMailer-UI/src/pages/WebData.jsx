@@ -3,6 +3,7 @@ import DownloadDataBlock from "../components/DownloadDataBlock";
 import StickyHeadTable from "../components/ShowWebDataTable";
 import PropagateLoader from "react-spinners/PropagateLoader";
 import { WebDataContext } from "../context/WebDataContext";
+import { COLORS } from "../constants/theme";
 
 const WebData = () => {
   const { webData, loading, fetchWebData, error } = useContext(WebDataContext);
@@ -25,7 +26,10 @@ const WebData = () => {
   console.log("again at WebData:", webData);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div
+      style={{ backgroundColor: COLORS.background }}
+      className="flex flex-col gap-6 p-6 h-full"
+    >
       <h1 className="text-lg font-bold">Extract Data from Google</h1>
       <div className="flex flex-row gap-12 mt-4  items-center">
         <div className="flex flex-row  items-center gap-4">
@@ -55,7 +59,9 @@ const WebData = () => {
           Start
         </button>
       </div>
-      {showAlert && <span className="text-red-600 text-sm ">Please enter a keyword!</span>}
+      {showAlert && (
+        <span className="text-red-600 text-sm ">Please enter a keyword!</span>
+      )}
 
       {loading ? (
         <div className="pt-6">

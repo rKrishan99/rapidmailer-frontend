@@ -3,6 +3,7 @@ import burgerIcon from './burgerIcon.svg';
 import dashboard from './dashboard1.svg';
 import downloadIcon from './download.svg'
 import burgerExpandIcon from './burgerExpandIcon.svg';
+import bannerImg from './bannerImg.png'
 
 
 export const images = {
@@ -11,5 +12,6 @@ export const images = {
     dashboard,
     downloadIcon,
     burgerExpandIcon,
+    bannerImg,
 }
     

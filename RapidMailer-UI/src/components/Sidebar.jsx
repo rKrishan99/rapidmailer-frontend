@@ -3,6 +3,7 @@ import { images } from "../assets/assets";
 import { sidebarContent } from "../assets/sidebarWidgets";
 import { useNavigate } from "react-router-dom";
 import { SidebarExpandContext } from "../context/SidebarExpandContext";
+import { COLORS } from "../constants/theme";
 
 const Sidebar = () => {
 
@@ -11,10 +12,11 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <div className={`${isExpand ? "w-[220px]" : "w-[60px]"} bg-[#f1f1f1] overflow-hidden transition-all duration-300 h-screen`}>
+    <div style={{ backgroundColor: COLORS.primary }} className={`${isExpand ? "w-[220px]" : "w-[60px]"} overflow-hidden transition-all duration-300 h-screen`}>
       <div
         onClick={() => navigate("/dashbord")}
-        className="flex w-full flex-row p-2 gap-3 items-center bg-[#A9F1DF] cursor-pointer"
+        style={{ backgroundColor: COLORS.lightGreeen }}
+        className="flex w-full flex-row p-2 gap-3 items-center cursor-pointer"
       >
         <img className="w-[40px]" src={images.dashboard} alt="" />
         <h1 className={`${ isExpand ? "font-bold text-lg text-[#03288b]" : "hidden"}`}>Dashboard</h1>
