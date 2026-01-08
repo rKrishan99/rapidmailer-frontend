@@ -1,25 +1,22 @@
-import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import * as React from "react";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
 
 const columns = [
-  { id: 'name', label: 'Name', minWidth: 200 },
-  { id: 'address', label: 'Address', minWidth: 200 },
-  { id: 'phone', label: 'Phone', minWidth: 200 }, 
-  { id: 'category', label: 'Category', minWidth: 150 },
-  { id: 'rating', label: 'Rating', minWidth: 100,},
+  { id: "name", label: "Name", minWidth: 200 },
+  { id: "address", label: "Address", minWidth: 200 },
+  { id: "phone", label: "Phone", minWidth: 150 },
+  { id: "category", label: "Category", minWidth: 150 },
+  { id: "rating", label: "Rating", minWidth: 100 },
+  { id: "reviews", label: "Reviews", minWidth: 150 },
+  { id: "website", label: "Website", minWidth: 200 },
 ];
-
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
 
 export default function StickyHeadTable({ data }) {
   const [page, setPage] = React.useState(0);
@@ -35,7 +32,7 @@ export default function StickyHeadTable({ data }) {
   };
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+    <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer sx={{ maxHeight: 300 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -44,7 +41,7 @@ export default function StickyHeadTable({ data }) {
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
+                  style={{ minWidth: column.minWidth, fontWeight: "bold" }}
                 >
                   {column.label}
                 </TableCell>
