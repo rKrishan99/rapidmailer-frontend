@@ -4,6 +4,7 @@ import Tools from "./Tools";
 import GoogleMapData from "./GoogleMapData";
 import WebData from "./WebData";
 import EmailFinder from "./EmailFinder";
+import SocialEnricher from "./SocialEnricher";
 import VerifyEmails from "./VerifyEmails";
 import SendEmails from "./SendEmails";
 import ValidationResult from "./ValidationResult";
@@ -21,6 +22,7 @@ const Home = () => (
     <Route path="/gmap-data" element={<GoogleMapData />} />
     <Route path="/web-data" element={<WebData />} />
     <Route path="/email-finder" element={<EmailFinder />} />
+    <Route path="/social-enricher" element={<SocialEnricher />} />
     <Route path="/verify-mails" element={<VerifyEmails />} />
     <Route path="/send-mails" element={<SendEmails />} />
     <Route path="/validation-results" element={<ValidationResult />} />

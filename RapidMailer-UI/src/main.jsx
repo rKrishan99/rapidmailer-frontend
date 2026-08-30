@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { GoogleMapDataProvider } from "./context/MapDataContext.jsx";
 import { WebDataProvider } from "./context/WebDataContext.jsx";
 import { EmailFinderProvider } from "./context/EmailFinderContext.jsx";
+import { SocialEnricherProvider } from "./context/SocialEnricherContext.jsx";
 import { SidebarExpandProvider } from "./context/SidebarExpandContext.jsx";
 import { EmailsVerifyProvider } from "./context/EmailsVerifyContext.jsx";
 import { EmailProvider } from "./context/EmailContext.jsx";
@@ -19,23 +20,25 @@ createRoot(document.getElementById("root")).render(
     <GoogleMapDataProvider>
       <WebDataProvider>
         <EmailFinderProvider>
-          <SidebarExpandProvider>
-            <EmailsVerifyProvider>
-              <EmailsSendProvider>
-                <EmailProvider>
-                  <UploadedListsProvider>
-                    <TechDetectorProvider>
-                      <WebsiteAuditProvider>
-                        <SettingsProvider>
-                          <App />
-                        </SettingsProvider>
-                      </WebsiteAuditProvider>
-                    </TechDetectorProvider>
-                  </UploadedListsProvider>
-                </EmailProvider>
-              </EmailsSendProvider>
-            </EmailsVerifyProvider>
-          </SidebarExpandProvider>
+          <SocialEnricherProvider>
+            <SidebarExpandProvider>
+              <EmailsVerifyProvider>
+                <EmailsSendProvider>
+                  <EmailProvider>
+                    <UploadedListsProvider>
+                      <TechDetectorProvider>
+                        <WebsiteAuditProvider>
+                          <SettingsProvider>
+                            <App />
+                          </SettingsProvider>
+                        </WebsiteAuditProvider>
+                      </TechDetectorProvider>
+                    </UploadedListsProvider>
+                  </EmailProvider>
+                </EmailsSendProvider>
+              </EmailsVerifyProvider>
+            </SidebarExpandProvider>
+          </SocialEnricherProvider>
         </EmailFinderProvider>
       </WebDataProvider>
     </GoogleMapDataProvider>

@@ -6,6 +6,7 @@ import {
   RiMapPin2Line,
   RiGlobalLine,
   RiSearchLine,
+  RiShareForwardLine,
   RiMailCheckLine,
   RiSendPlaneLine,
   RiCodeSSlashLine,
@@ -31,6 +32,7 @@ const NAV_GROUPS = [
       { title: "Google Maps", path: "/gmap-data", icon: RiMapPin2Line },
       { title: "Web Search", path: "/web-data", icon: RiGlobalLine },
       { title: "Email Finder", path: "/email-finder", icon: RiSearchLine },
+      { title: "Social Enricher", path: "/social-enricher", icon: RiShareForwardLine },
     ],
   },
   {

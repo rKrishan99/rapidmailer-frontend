@@ -43,4 +43,4 @@ export function GoogleMapDataProvider({children}){
             {children}
         </GoogleMapDataContext.Provider>
     );
-} 
+}

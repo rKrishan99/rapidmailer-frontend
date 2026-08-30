@@ -6,6 +6,7 @@ import {
   RiSendPlaneLine,
   RiCodeSSlashLine,
   RiShieldCheckLine,
+  RiShareForwardLine,
 } from "react-icons/ri";
 
 export const toolInfo = [
@@ -26,6 +27,12 @@ export const toolInfo = [
     title: "Email Finder (from CSV)",
     description: "Upload a leads CSV and fill in an email column from each site.",
     path: "/email-finder",
+  },
+  {
+    icon: RiShareForwardLine,
+    title: "Social Enricher (from CSV)",
+    description: "Upload your \"No Website\" leads and find their Facebook/Instagram page instead.",
+    path: "/social-enricher",
   },
   {
     icon: RiMailCheckLine,

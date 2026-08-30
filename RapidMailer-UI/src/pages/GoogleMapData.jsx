@@ -81,7 +81,8 @@ const GoogleMapData = () => {
               <h3 className="font-semibold text-white">Split for the pipeline</h3>
               <p className="text-sm text-slate-400">
                 Leads with a real website can go straight into Email Finder, Tech Detector or Website
-                Audit. Leads with none need a different outreach method — export the two separately.
+                Audit. Leads with none need a different outreach method — export the "No Website" CSV
+                and run it through the Social Enricher tool instead.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
