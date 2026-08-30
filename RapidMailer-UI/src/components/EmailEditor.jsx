@@ -1,189 +1,143 @@
-// import { useEditor, EditorContent } from "@tiptap/react";
-// import StarterKit from "@tiptap/starter-kit";
-// import Image from "@tiptap/extension-image";
-// import TextStyle from "@tiptap/extension-text-style";
-// import Color from "@tiptap/extension-color";
-// import TextAlign from "@tiptap/extension-text-align";
-// import FontFamily from "@tiptap/extension-font-family";
-// import FontSize from "@tiptap/extension-font-size";
-// import Link from "@tiptap/extension-link";
-// import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { COLORS } from "../constants/theme";
+import EmailEditor from "react-email-editor";
+import { useEmailContext } from "../context/EmailContext";
+import { useNavigate } from "react-router-dom";
+import { IoIosArrowBack } from "react-icons/io";
 
-// const EmailEditor = () => {
-//   const [imageUrl, setImageUrl] = useState("");
-//   const [linkUrl, setLinkUrl] = useState("");
+const EmailEditorComponent = () => {
+  const emailEditorRef = useRef(null);
+  const [isEditorReady, setIsEditorReady] = useState(false); // Add loading state
+  const {
+    emailTemplate,
+    setEmailTemplate,
+    setEmailHtml,
+    isEditing,
+    setIsEditing,
+  } = useEmailContext();
+  const navigate = useNavigate();
 
-//   const editor = useEditor({
-//     extensions: [
-//       StarterKit,
-//       Image,
-//       TextStyle,
-//       Color,
-//       TextAlign.configure({ types: ["heading", "paragraph"] }),
-//       FontFamily,
-//       FontSize.configure({ types: ["textStyle"] }),
-//       Link.configure({ openOnClick: true }),
-//     ],
-//     content: "<p>Start writing your email...</p>",
-//   });
+  // Initialize the editor when it's ready
+  const onEditorLoad = () => {
+    setIsEditorReady(true);
 
-//   if (!editor) return null;
+    if (!emailEditorRef.current) return; // Add null check
 
-//   const addImage = () => {
-//     if (imageUrl) {
-//       editor.chain().focus().setImage({ src: imageUrl }).run();
-//       setImageUrl("");
-//     }
-//   };
+    if (isEditing && emailTemplate) {
+      emailEditorRef.current.editor.loadDesign(emailTemplate);
+    } else {
+      emailEditorRef.current.editor.loadDesign({});
+    }
+  };
 
-//   const addLocalImage = (event) => {
-//     const file = event.target.files[0];
-//     if (file) {
-//       const reader = new FileReader();
-//       reader.onload = () => {
-//         editor.chain().focus().setImage({ src: reader.result }).run();
-//       };
-//       reader.readAsDataURL(file);
-//     }
-//   };
+  // Load existing template if editing
+  useEffect(() => {
+    if (isEditorReady && emailEditorRef.current?.editor) {
+      if (isEditing && emailTemplate) {
+        emailEditorRef.current.editor.loadDesign(emailTemplate);
+      } else {
+        emailEditorRef.current.editor.loadDesign({});
+      }
+    }
+  }, [isEditing, emailTemplate, isEditorReady]);
 
-//   const addLink = () => {
-//     if (linkUrl) {
-//       editor.chain().focus().setLink({ href: linkUrl, target: "_blank" }).run();
-//       setLinkUrl("");
-//     }
-//   };
+  const handleSave = async () => {
+    if (!isEditorReady || !emailEditorRef.current?.editor) {
+      console.error("Editor not ready");
+      return;
+    }
+    try {
+      const design = await new Promise((resolve) => {
+        emailEditorRef.current.editor.saveDesign(resolve);
+      });
+      setEmailTemplate(design);
+      console.log("Template saved:", design);
+      alert("Template saved successfully!"); // Add user feedback
+    } catch (error) {
+      console.error("Error saving template:", error);
+    }
+  };
 
-//   return (
-//     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg border border-gray-200">
-//       {/* Toolbar */}
-//       <div className="flex flex-wrap gap-2 mb-4 p-3 bg-gray-100 rounded-lg">
-//         <button
-//           onClick={() => editor.chain().focus().toggleBold().run()}
-//           className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-700"
-//         >
-//           Bold
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().toggleItalic().run()}
-//           className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-700"
-//         >
-//           Italic
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().toggleUnderline().run()}
-//           className="px-3 py-1 bg-purple-500 text-white rounded-md hover:bg-purple-700"
-//         >
-//           Underline
-//         </button>
-//         <input
-//           type="color"
-//           onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
-//           title="Text Color"
-//           className="w-10 h-10 border border-gray-300 rounded-md"
-//         />
-//         <select
-//           onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
-//           className="p-1 border border-gray-300 rounded-md"
-//         >
-//           <option value="Arial">Arial</option>
-//           <option value="Georgia">Georgia</option>
-//           <option value="Courier New">Courier New</option>
-//           <option value="Times New Roman">Times New Roman</option>
-//           <option value="Verdana">Verdana</option>
-//         </select>
-//         <input
-//           type="number"
-//           min="8"
-//           max="72"
-//           onChange={(e) => editor.chain().focus().setFontSize(`${e.target.value}px`).run()}
-//           placeholder="Font Size"
-//           className="p-1 w-16 border border-gray-300 rounded-md"
-//         />
+  const handleSaveAndContinue = async () => {
+    if (!isEditorReady || !emailEditorRef.current?.editor) return;
 
-//         {/* Image Upload */}
-//         <input
-//           type="text"
-//           placeholder="Image URL"
-//           value={imageUrl}
-//           onChange={(e) => setImageUrl(e.target.value)}
-//           className="p-1 border border-gray-300 rounded-md"
-//         />
-//         <button
-//           onClick={addImage}
-//           className="px-3 py-1 bg-orange-500 text-white rounded-md hover:bg-orange-700"
-//         >
-//           Add Image
-//         </button>
-//         <input
-//           type="file"
-//           accept="image/*"
-//           onChange={addLocalImage}
-//           className="p-1 border border-gray-300 rounded-md"
-//         />
+    try {
+      // First save the design
+      const design = await new Promise((resolve) => {
+        emailEditorRef.current.editor.saveDesign(resolve);
+      });
+      setEmailTemplate(design);
 
-//         {/* Link Input */}
-//         <input
-//           type="text"
-//           placeholder="Insert Link"
-//           value={linkUrl}
-//           onChange={(e) => setLinkUrl(e.target.value)}
-//           className="p-1 border border-gray-300 rounded-md"
-//         />
-//         <button
-//           onClick={addLink}
-//           className="px-3 py-1 bg-indigo-500 text-white rounded-md hover:bg-indigo-700"
-//         >
-//           Add Link
-//         </button>
+      // Then export HTML
+      const data = await new Promise((resolve) => {
+        emailEditorRef.current.editor.exportHtml(resolve);
+      });
+      
+      const { html } = data;
+      setEmailHtml(html);
+      setIsEditing(false);
+      navigate("/send-mails");
+    } catch (error) {
+      console.error("Error saving and continuing:", error);
+    }
+  };
 
-//         {/* Text Transform Options */}
-//         <button
-//           onClick={() => editor.chain().focus().toggleUppercase().run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Uppercase
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().toggleLowercase().run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Lowercase
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().toggleCapitalized().run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Capitalize
-//         </button>
+  const exportHtml = () => {
+    if (!emailEditorRef.current?.editor) return;
 
-//         {/* Text Alignment */}
-//         <button
-//           onClick={() => editor.chain().focus().setTextAlign("left").run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Left
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().setTextAlign("center").run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Center
-//         </button>
-//         <button
-//           onClick={() => editor.chain().focus().setTextAlign("right").run()}
-//           className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-//         >
-//           Right
-//         </button>
-//       </div>
+    emailEditorRef.current.editor.exportHtml((data) => {
+      const { html } = data;
+      console.log("Exported HTML:", html);
+    });
+  };
 
-//       {/* Editor */}
-//       <div className="border border-gray-300 rounded-lg p-4 bg-white min-h-[200px]">
-//         <EditorContent editor={editor} />
-//       </div>
-//     </div>
-//   );
-// };
+  return (
+    <div
+      style={{ backgroundColor: COLORS.background }}
+      className="h-full w-full flex flex-col"
+    >
+      <div onClick={() => navigate("/send-mails")} className="flex gap-4 p-4">
+        <div className="bg-[#1EAE98] flex items-center justify-content-center cursor-pointer text-white px-2 py-2 rounded">
+          <IoIosArrowBack />
+        </div>
+        <button
+          onClick={handleSave}
+          className="bg-[#1EAE98] text-white px-4 py-2 rounded cursor-pointer"
+        >
+          Save Template
+        </button>
+        <button
+          onClick={handleSaveAndContinue}
+          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+        >
+          Save & Continue
+        </button>
+        <button
+          onClick={exportHtml}
+          className="bg-purple-600 text-white px-4 py-2 rounded cursor-pointer"
+        >
+          Export HTML
+        </button>
+      </div>
 
-// export default EmailEditor;
+      <EmailEditor
+        ref={emailEditorRef}
+        style={{ flex: 1 }}
+        onLoad={onEditorLoad} // Add this callback
+        options={{
+          appearance: {
+            theme: "dark",
+            panels: {
+              tools: {
+                dock: "left",
+              },
+            },
+          },
+          customCSS: [`.my-button { background-color: ${COLORS.primary}; }`],
+        }}
+      />
+    </div>
+  );
+};
+
+export default EmailEditorComponent;

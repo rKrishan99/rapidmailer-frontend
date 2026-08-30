@@ -6,6 +6,9 @@ import { GoogleMapDataProvider } from "./context/MapDataContext.jsx";
 import { WebDataProvider } from "./context/WebDataContext.jsx";
 import { SidebarExpandProvider } from "./context/SidebarExpandContext.jsx";
 import { EmailsVerifyProvider } from "./context/EmailsVerifyContext.jsx";
+import { EmailProvider } from "./context/EmailContext.jsx";
+import { UploadedListsProvider } from "./context/UploadedListsContext.jsx";
+import { EmailsSendProvider } from "./context/EmailsSendContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -13,7 +16,13 @@ createRoot(document.getElementById("root")).render(
       <WebDataProvider>
         <SidebarExpandProvider>
           <EmailsVerifyProvider>
-            <App />
+            <EmailsSendProvider>
+              <EmailProvider>
+                <UploadedListsProvider>
+                  <App />
+                </UploadedListsProvider>
+              </EmailProvider>
+            </EmailsSendProvider>
           </EmailsVerifyProvider>
         </SidebarExpandProvider>
       </WebDataProvider>
