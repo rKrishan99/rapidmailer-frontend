@@ -29,3 +29,4 @@ const CircularProgress = ({ percentage }) => {
 };
 
 export default CircularProgress;
+
