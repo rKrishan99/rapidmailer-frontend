@@ -6,11 +6,13 @@ const EmailContext = createContext();
 export const EmailProvider = ({ children }) => {
   const [emailTemplate, setEmailTemplate] = useState(null);
   const [emailHtml, setEmailHtml] = useState('');
+  const [subject, setSubject] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
   const resetEmailContext = () => {
     setEmailTemplate(null);
     setEmailHtml('');
+    setSubject('');
     setIsEditing(false);
   };
 
@@ -21,6 +23,8 @@ export const EmailProvider = ({ children }) => {
         setEmailTemplate,
         emailHtml,
         setEmailHtml,
+        subject,
+        setSubject,
         isEditing,
         setIsEditing,
         resetEmailContext

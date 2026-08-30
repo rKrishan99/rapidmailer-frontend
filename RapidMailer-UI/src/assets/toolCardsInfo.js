@@ -1,6 +1,7 @@
 import {
   RiMapPin2Line,
   RiGlobalLine,
+  RiSearchLine,
   RiMailCheckLine,
   RiSendPlaneLine,
   RiCodeSSlashLine,
@@ -21,6 +22,12 @@ export const toolInfo = [
     path: "/web-data",
   },
   {
+    icon: RiSearchLine,
+    title: "Email Finder (from CSV)",
+    description: "Upload a leads CSV and fill in an email column from each site.",
+    path: "/email-finder",
+  },
+  {
     icon: RiMailCheckLine,
     title: "Email Validation",
     description: "Upload a CSV and split it into valid and invalid addresses.",
@@ -29,19 +36,19 @@ export const toolInfo = [
   {
     icon: RiSendPlaneLine,
     title: "Bulk Email Sending",
-    description: "Design a campaign and send it to your uploaded list.",
+    description: "Design a campaign and send it as a blast or a personalized mail-merge.",
     path: "/send-mails",
   },
   {
     icon: RiCodeSSlashLine,
     title: "Website Tech Stack Detector",
-    description: "Detect the CMS, framework and server behind any site.",
+    description: "Detect the CMS, framework and server behind any site — single or bulk CSV.",
     path: "/tech-detector",
   },
   {
     icon: RiShieldCheckLine,
     title: "Bulk Website Audit",
-    description: "Check performance, security and SEO basics at a glance.",
+    description: "Check performance, security and SEO basics, then filter out dead leads.",
     path: "/website-audit",
   },
 ];

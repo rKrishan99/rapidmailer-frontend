@@ -4,12 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { useEmailContext } from "../context/EmailContext";
 import Button from "./ui/Button";
+import { Input } from "./ui/Field";
 
 const EmailEditorComponent = () => {
   const emailEditorRef = useRef(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
-  const { emailTemplate, setEmailTemplate, setEmailHtml, isEditing, setIsEditing } =
-    useEmailContext();
+  const {
+    emailTemplate,
+    setEmailTemplate,
+    setEmailHtml,
+    subject,
+    setSubject,
+    isEditing,
+    setIsEditing,
+  } = useEmailContext();
   const navigate = useNavigate();
 
   const onEditorLoad = () => {
@@ -90,6 +98,12 @@ const EmailEditorComponent = () => {
         >
           <IoIosArrowBack />
         </button>
+        <Input
+          placeholder="Email subject line"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          className="w-72"
+        />
         <Button variant="secondary" onClick={handleSave}>
           Save Template
         </Button>
@@ -99,6 +113,13 @@ const EmailEditorComponent = () => {
         <Button variant="secondary" onClick={exportHtml}>
           Export HTML
         </Button>
+      </div>
+
+      <div className="border-b border-white/10 bg-white/[0.015] px-4 py-2 text-xs text-slate-500">
+        Tip: type <code className="text-slate-400">{"{{field}}"}</code> anywhere in the subject or
+        body (e.g. <code className="text-slate-400">{"{{business_name}}"}</code>,{" "}
+        <code className="text-slate-400">{"{{score}}"}</code>) to fill it in per-recipient when you
+        send a personalized (mail-merge) campaign.
       </div>
 
       <EmailEditor

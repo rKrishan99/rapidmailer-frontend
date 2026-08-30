@@ -9,17 +9,15 @@ export function EmailsSendProvider({ children }) {
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
 
-
-
-  const SendEmails = async (emailTemplate, emails) => {
+  // Takes the full request body ({emailTemplate, emails} for a blast, or
+  // {emailTemplate, mode: "personalized", records} for a mail-merge send)
+  // and posts it straight through to the backend.
+  const SendEmails = async (payload) => {
     setLoading(true);
     setError(null);
 
-    try { 
-      const response = await axios.post(
-        `${API_BASE_URL}/send-emails`,
-        { emailTemplate, emails }
-      );
+    try {
+      const response = await axios.post(`${API_BASE_URL}/send-emails`, payload);
       return response.data;
     } catch (err) {
       setError(err.response?.data?.error || err.message);
@@ -34,6 +32,7 @@ export function EmailsSendProvider({ children }) {
     setLoading,
     error,
     setError,
+    response,
     SendEmails,
     setResponse,
   };
