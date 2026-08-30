@@ -1,5 +1,6 @@
 import { createContext, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../constants/api';
 
 export const EmailsVerifyContext = createContext();
 
@@ -16,7 +17,7 @@ export function EmailsVerifyProvider({ children }) {
     
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/verify-emails',
+        `${API_BASE_URL}/verify-emails`,
         { emails }
       );
       

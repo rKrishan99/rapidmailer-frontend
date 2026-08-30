@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 export const TechDetectorContext = createContext();
 
@@ -13,7 +14,7 @@ export function TechDetectorProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/detect-tech", {
+      const response = await axios.get(`${API_BASE_URL}/detect-tech`, {
         params: { url },
       });
       setResults([response.data.result]);
@@ -29,7 +30,7 @@ export function TechDetectorProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post("http://localhost:5000/api/detect-tech-bulk", {
+      const response = await axios.post(`${API_BASE_URL}/detect-tech-bulk`, {
         urls,
       });
       setResults(response.data.results || []);

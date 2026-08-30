@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import axios from 'axios';
+import { API_BASE_URL } from '../constants/api';
 
 
 export const WebDataContext = createContext();
@@ -15,7 +16,7 @@ export function WebDataProvider({children}){
         console.log('here is fetchWebMapData...', keyword , location);
         setLoading(true);
         try{
-            const response = await axios.get("http://localhost:5000/api/extract-emails", {
+            const response = await axios.get(`${API_BASE_URL}/extract-emails`, {
                 params: { keyword, location }
             });
             console.log("response.data:", response.data);

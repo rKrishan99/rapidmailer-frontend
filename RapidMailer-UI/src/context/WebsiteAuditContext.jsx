@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 export const WebsiteAuditContext = createContext();
 
@@ -13,7 +14,7 @@ export function WebsiteAuditProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/audit-website", {
+      const response = await axios.get(`${API_BASE_URL}/audit-website`, {
         params: { url },
       });
       setResults([response.data.result]);
@@ -29,7 +30,7 @@ export function WebsiteAuditProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post("http://localhost:5000/api/audit-website-bulk", {
+      const response = await axios.post(`${API_BASE_URL}/audit-website-bulk`, {
         urls,
       });
       setResults(response.data.results || []);

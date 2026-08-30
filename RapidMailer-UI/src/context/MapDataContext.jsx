@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
 import axios from 'axios';
+import { API_BASE_URL } from '../constants/api';
 
 
 export const GoogleMapDataContext = createContext();
@@ -15,7 +16,7 @@ export function GoogleMapDataProvider({children}){
         console.log('here is fetchGoogleMapData...', keyword , location);
         setLoading(true);
         try{
-            const response = await axios.get("http://localhost:5000/api/google-maps", {
+            const response = await axios.get(`${API_BASE_URL}/google-maps`, {
                 params: { keyword, location }
             });
             console.log("response.data:", response.data);
