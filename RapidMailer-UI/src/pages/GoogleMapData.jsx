@@ -1,81 +1,82 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
+import { RiMapPin2Line, RiPlayFill } from "react-icons/ri";
 import DownloadDataBlock from "../components/DownloadDataBlock";
 import { GoogleMapDataContext } from "../context/MapDataContext";
 import StickyHeadTable from "../components/ShowMapDataTable";
-import PropagateLoader from "react-spinners/PropagateLoader";
-import { COLORS } from "../constants/theme";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import { Input } from "../components/ui/Field";
+import PageHeader from "../components/ui/PageHeader";
+import SectionLoader from "../components/ui/SectionLoader";
+import EmptyState from "../components/ui/EmptyState";
 
 const GoogleMapData = () => {
-  const { googleMapData, loading, fetchGoogleMapData, error } =
-    useContext(GoogleMapDataContext);
+  const { googleMapData, loading, fetchGoogleMapData, error } = useContext(GoogleMapDataContext);
 
   const [keyword, setkeyword] = useState("");
   const [location, setLocation] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
   const handleStart = () => {
-    console.log("here is handleStart..", keyword, location);
     if (keyword && location) {
       fetchGoogleMapData(keyword, location);
       setkeyword("");
       setLocation("");
+      setShowAlert(false);
     } else {
       setShowAlert(true);
     }
   };
 
-  console.log("again at GoogleMapData:", googleMapData);
-
   return (
-    <div style={{ backgroundColor: COLORS.background }} className="flex flex-col gap-6 p-6 h-full">
-      <h1 className="text-lg font-bold">Extract Data from Google Maps</h1>
-      <div className="flex flex-row gap-12 mt-4  items-center">
-        <div className="flex flex-row  items-center gap-4">
-          <span className="font-semibold">Enter a keyword </span>
-          <input
-            className="border-1 px-2 py-1 focus:border-[#1EAE98] border-gray-400 rounded-lg"
-            type="text"
-            placeholder="eg: coffee shop"
+    <div className="flex flex-col gap-8 p-6 md:p-10">
+      <PageHeader
+        eyebrow="Lead Generation"
+        title="Extract Data from Google Maps"
+        description="Search a keyword and a location to pull business leads with contact details."
+      />
+
+      <Card className="flex flex-col gap-4 p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+          <Input
+            label="Keyword"
+            placeholder="e.g. coffee shop"
             value={keyword}
             onChange={(e) => setkeyword(e.target.value)}
+            className="md:w-64"
           />
-        </div>
-        <div className="flex flex-row  items-center gap-4">
-          <span className="font-semibold">Enter a location </span>
-          <input
-            className="border-1 px-2 py-1 focus:border-[#1EAE98] border-gray-400 rounded-lg"
-            type="text"
-            placeholder="eg: texas"
+          <Input
+            label="Location"
+            placeholder="e.g. texas"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            className="md:w-64"
           />
+          <Button onClick={handleStart}>
+            <RiPlayFill />
+            Start
+          </Button>
         </div>
-        <button
-          onClick={handleStart}
-          className="bg-[#1EAE98] flex items-center justify-center text-white px-8 py-1 rounded-lg cursor-pointer hover:bg-[#1eae7c]"
-        >
-          Start
-        </button>
-      </div>
-      {showAlert && <span className="text-red-600 text-sm ">Please enter both a keyword and a location!</span>}
+        {showAlert && (
+          <span className="text-sm text-rose-400">Please enter both a keyword and a location!</span>
+        )}
+      </Card>
+
       {loading ? (
-        <div className="pt-6">
-          <span className="text-[#1EAE98]">
-            Data collection has started. Please wait...
-          </span>
-          <div className="flex h-[300px] items-center justify-center">
-            <PropagateLoader color="#1EAE98" />
-          </div>
-        </div>
+        <SectionLoader label="Data collection has started. Please wait..." />
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <p className="text-rose-400">{error}</p>
       ) : googleMapData?.results?.length > 0 ? (
-        <div className="flex flex-col gap-6 mt-10">
+        <div className="flex flex-col gap-5">
           <StickyHeadTable data={googleMapData?.results || []} />
           <DownloadDataBlock data={googleMapData?.results || []} />
         </div>
       ) : (
-        <></>
+        <EmptyState
+          icon={RiMapPin2Line}
+          title="No leads yet"
+          description="Run a search above to pull leads from Google Maps."
+        />
       )}
     </div>
   );

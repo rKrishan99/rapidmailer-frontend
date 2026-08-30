@@ -1,14 +1,22 @@
-import React, { useContext, useState } from "react";
-import StickyHeadTable from "../components/EmailTable";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
-import { EmailsVerifyContext } from "../context/EmailsVerifyContext";
-import { COLORS } from "../constants/theme";
-import { MdOutlineAttachEmail } from "react-icons/md";
-import { FaRegEdit } from "react-icons/fa";
+import {
+  RiUpload2Line,
+  RiDeleteBinLine,
+  RiPlayFill,
+  RiMailAddLine,
+  RiEditLine,
+  RiSendPlaneLine,
+} from "react-icons/ri";
+import StickyHeadTable from "../components/EmailTable";
 import { useEmailContext } from "../context/EmailContext";
 import { UploadedListsContext } from "../context/UploadedListsContext";
 import { EmailsSendContext } from "../context/EmailsSendContext";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import PageHeader from "../components/ui/PageHeader";
+import EmptyState from "../components/ui/EmptyState";
 
 const SendEmails = () => {
   const navigate = useNavigate();
@@ -19,8 +27,8 @@ const SendEmails = () => {
   const { setResponse, SendEmails } = useContext(EmailsSendContext);
 
   const handleEditEmail = () => {
-    setIsEditing(true); // Set editing mode to true
-    navigate("/create-email"); // Navigate to editor
+    setIsEditing(true);
+    navigate("/create-email");
   };
 
   const handleFileUpload = (event) => {
@@ -30,7 +38,6 @@ const SendEmails = () => {
         complete: (result) => {
           const emails = result.data.map((row) => ({ email: row[0] }));
           setEmailList(emails);
-          console.log(emails);
           setIsDataEmptyError(false);
         },
         skipEmptyLines: true,
@@ -50,55 +57,41 @@ const SendEmails = () => {
     }
 
     setIsDataEmptyError(false);
-
-    // Extract emails from emailData
     const emails = emailList.map((row) => row.email);
-
-    // Call the validateEmails function
     const response = SendEmails(emailTemplate, emails);
     setResponse(response);
-    console.log(response);
     navigate("/sent-results");
     setEmailList([]);
   };
 
   return (
-    <div
-      style={{ backgroundColor: COLORS.background }}
-      className="flex flex-col p-6 h-full"
-    >
-      <h1 className="text-lg font-bold">Email Campeign</h1>
-      <div className="flex w-full">
-        <div className="flex-1 flex-col lg:gap-4 lg:flex-1">
+    <div className="flex flex-col gap-8 p-6 md:p-10">
+      <PageHeader
+        eyebrow="Email"
+        title="Email Campaign"
+        description="Create the email, upload your list, then send it in one click."
+      />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="flex flex-col gap-5 p-6">
           {emailTemplate == null ? (
-            <div
-              onClick={() => navigate("/create-email")}
-              style={{
-                backgroundColor: COLORS.primary,
-              }}
-              className="flex flex-row items-center justify-center gap-2 w-[200px] mt-12 rounded-lg  cursor-pointer py-2 px-4"
-            >
-              <MdOutlineAttachEmail className="text-white text-md mt-1" />
-              <span className="text-white text-md">Create an Email</span>
-            </div>
+            <Button onClick={() => navigate("/create-email")} className="w-fit">
+              <RiMailAddLine />
+              Create an Email
+            </Button>
           ) : (
-            <div
-              onClick={handleEditEmail}
-              style={{
-                backgroundColor: COLORS.primary,
-              }}
-              className="flex flex-row items-center justify-center gap-2 w-[200px] mt-12 rounded-lg  cursor-pointer py-2 px-4"
-            >
-              <FaRegEdit className="text-white text-md mt-1" />
-              <span className="text-white text-md">Edit the Email</span>
-            </div>
+            <Button onClick={handleEditEmail} className="w-fit">
+              <RiEditLine />
+              Edit the Email
+            </Button>
           )}
-          <div className="flex flex-row mt-12 gap-4 items-center">
-            <h1 className="text-lg font-semibold">Add Email List</h1>
+
+          <div className="flex flex-wrap items-center gap-3">
             <label
               htmlFor="csv-file-input"
-              className="bg-[#1EAE98] cursor-pointer px-4 py-1 rounded-sm text-white"
+              className="grad-bg inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 hover:brightness-110"
             >
+              <RiUpload2Line />
               Choose CSV File
             </label>
             <input
@@ -108,40 +101,43 @@ const SendEmails = () => {
               className="hidden"
               onChange={handleFileUpload}
             />
-            <button
-              onClick={() => setEmailData([])}
-              className="bg-red-700 text-white px-3 rounded-sm cursor-pointer"
-            >
+            <Button variant="danger" onClick={() => setEmailList([])}>
+              <RiDeleteBinLine />
               Clear
-            </button>
+            </Button>
           </div>
 
-          <div className="mt-10">
-            {isDataEmptyError ? (
-              <span className="mt-6 text-red-500">
-                Pease add an email list.
-              </span>
-            ) : (
-              <></>
+          {emailList.length > 0 && (
+            <p className="text-sm text-slate-400">{emailList.length} emails loaded.</p>
+          )}
+
+          <div className="flex flex-col gap-2">
+            {isDataEmptyError && (
+              <span className="text-sm text-rose-400">Please add an email list.</span>
             )}
-            {isEmailEmptyError ? (
-              <span className="mt-6 text-red-500">Pease Create an email.</span>
-            ) : (
-              <></>
+            {isEmailEmptyError && (
+              <span className="text-sm text-rose-400">Please create an email.</span>
             )}
           </div>
 
-          <button
-            onClick={handleStart}
-            className="bg-[#1EAE98] mt-4 text-white rounded-sm w-[100px] cursor-pointer"
-          >
-            Start
-          </button>
-        </div>
-        <div className="mt-12 lg:mt-0 flex-1">
-          <div className="lg:mt-20">
-            {emailList.length !== 0 && <StickyHeadTable data={emailList} />}
+          <div>
+            <Button onClick={handleStart}>
+              <RiPlayFill />
+              Start
+            </Button>
           </div>
+        </Card>
+
+        <div>
+          {emailList.length > 0 ? (
+            <StickyHeadTable data={emailList} />
+          ) : (
+            <EmptyState
+              icon={RiSendPlaneLine}
+              title="No recipients loaded"
+              description="Upload a CSV file to preview the recipient list here."
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { images } from "../assets/assets";
+import { useState } from "react";
 import { saveAs } from "file-saver";
-import { Checkbox } from "@mui/material";
+import { RiDownloadLine } from "react-icons/ri";
+import Button from "./ui/Button";
 
 const DownloadDataBlock = ({ data, showOption }) => {
-  const [checkAll, setCheckAll] = useState(true);
-  const [checkMail, setCheckMail] = useState(false);
+  const [mode, setMode] = useState("all");
 
   const downloadCSV = () => {
     if (!data || data.length === 0) {
@@ -13,23 +12,17 @@ const DownloadDataBlock = ({ data, showOption }) => {
       return;
     }
 
-    // Determine which data to include based on the selected option
     let csvContent;
 
-    if (checkAll) {
-      // Export all data
+    if (mode === "all") {
       const headers = Object.keys(data[0]);
-
       csvContent =
         "data:text/csv;charset=utf-8," +
-        [
-          headers.join(","),
-          ...data.map((row) => headers.map((key) => row[key]).join(",")),
-        ].join("\n");
-    } else if (checkMail) {
-      // Export only emails
-      const headers = ["emails"]; // Only include the 'emails' column
-
+        [headers.join(","), ...data.map((row) => headers.map((key) => row[key]).join(","))].join(
+          "\n"
+        );
+    } else {
+      const headers = ["emails"];
       csvContent =
         "data:text/csv;charset=utf-8," +
         [
@@ -40,64 +33,41 @@ const DownloadDataBlock = ({ data, showOption }) => {
         ].join("\n");
     }
 
-    // Create a blob and trigger download
-    const encodedUri = encodeURI(csvContent);
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, checkAll ? "all_data.csv" : "emails_only.csv");
-  };
-
-  const handleChangeAll = () => {
-    setCheckAll(true);
-    setCheckMail(false);
-  };
-
-  const handleChangeMail = () => {
-    setCheckAll(false);
-    setCheckMail(true);
+    saveAs(blob, mode === "all" ? "all_data.csv" : "emails_only.csv");
   };
 
   return (
-    <div className="flex flex-row gap-8 justify-end">
+    <div className="flex flex-wrap items-center justify-end gap-6">
       {showOption && (
-        <div className="flex flex-row items-center gap-4">
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-sm">Export All Data</span>
-            <Checkbox
-              checked={checkAll}
-              onChange={handleChangeAll}
-              inputProps={{ "aria-label": "controlled" }}
-              sx={{
-                color: "#1EAE98", // Default unchecked color
-                "&.Mui-checked": {
-                  color: "#1EAE98", // Checked color
-                },
-              }}
+        <div className="flex items-center gap-4 text-sm text-slate-300">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              name="export-mode"
+              checked={mode === "all"}
+              onChange={() => setMode("all")}
+              className="h-4 w-4 accent-violet-500"
             />
-          </div>
-          <div className="flex flex-row items-center gap-2">
-            <span className="text-sm">Export Only Emails</span>
-            <Checkbox
-              checked={checkMail}
-              onChange={handleChangeMail}
-              inputProps={{ "aria-label": "controlled" }}
-              sx={{
-                color: "#1EAE98", // Default unchecked color
-                "&.Mui-checked": {
-                  color: "#1EAE98", // Checked color
-                },
-              }}
+            Export all data
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              name="export-mode"
+              checked={mode === "emails"}
+              onChange={() => setMode("emails")}
+              className="h-4 w-4 accent-violet-500"
             />
-          </div>
+            Export emails only
+          </label>
         </div>
       )}
 
-      <div
-        onClick={downloadCSV}
-        className="flex flex-row h-8 items-center gap-1 bg-[#1EAE98] hover:bg-[#1eae7c] px-6 py-2 rounded-lg cursor-pointer"
-      >
-        <img className="w-4" src={images.downloadIcon} alt="" />
-        <span className="text-white">Export</span>
-      </div>
+      <Button onClick={downloadCSV} variant="primary">
+        <RiDownloadLine />
+        Export
+      </Button>
     </div>
   );
 };

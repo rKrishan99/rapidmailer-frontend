@@ -1,0 +1,56 @@
+import { createContext, useState } from "react";
+import axios from "axios";
+
+export const WebsiteAuditContext = createContext();
+
+export function WebsiteAuditProvider({ children }) {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Single-URL audit
+  const auditSingle = async (url) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get("http://localhost:5000/api/audit-website", {
+        params: { url },
+      });
+      setResults([response.data.result]);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Failed to audit website.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Bulk audit — a pasted/uploaded list of URLs
+  const auditBulk = async (urls) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.post("http://localhost:5000/api/audit-website-bulk", {
+        urls,
+      });
+      setResults(response.data.results || []);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Failed to audit websites.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const value = {
+    results,
+    setResults,
+    loading,
+    error,
+    setError,
+    auditSingle,
+    auditBulk,
+  };
+
+  return (
+    <WebsiteAuditContext.Provider value={value}>{children}</WebsiteAuditContext.Provider>
+  );
+}

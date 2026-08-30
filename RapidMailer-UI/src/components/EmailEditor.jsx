@@ -1,27 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
-import { COLORS } from "../constants/theme";
+import { useEffect, useRef, useState } from "react";
 import EmailEditor from "react-email-editor";
-import { useEmailContext } from "../context/EmailContext";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
+import { useEmailContext } from "../context/EmailContext";
+import Button from "./ui/Button";
 
 const EmailEditorComponent = () => {
   const emailEditorRef = useRef(null);
-  const [isEditorReady, setIsEditorReady] = useState(false); // Add loading state
-  const {
-    emailTemplate,
-    setEmailTemplate,
-    setEmailHtml,
-    isEditing,
-    setIsEditing,
-  } = useEmailContext();
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  const { emailTemplate, setEmailTemplate, setEmailHtml, isEditing, setIsEditing } =
+    useEmailContext();
   const navigate = useNavigate();
 
-  // Initialize the editor when it's ready
   const onEditorLoad = () => {
     setIsEditorReady(true);
 
-    if (!emailEditorRef.current) return; // Add null check
+    if (!emailEditorRef.current) return;
 
     if (isEditing && emailTemplate) {
       emailEditorRef.current.editor.loadDesign(emailTemplate);
@@ -30,7 +24,6 @@ const EmailEditorComponent = () => {
     }
   };
 
-  // Load existing template if editing
   useEffect(() => {
     if (isEditorReady && emailEditorRef.current?.editor) {
       if (isEditing && emailTemplate) {
@@ -51,8 +44,7 @@ const EmailEditorComponent = () => {
         emailEditorRef.current.editor.saveDesign(resolve);
       });
       setEmailTemplate(design);
-      console.log("Template saved:", design);
-      alert("Template saved successfully!"); // Add user feedback
+      alert("Template saved successfully!");
     } catch (error) {
       console.error("Error saving template:", error);
     }
@@ -62,17 +54,15 @@ const EmailEditorComponent = () => {
     if (!isEditorReady || !emailEditorRef.current?.editor) return;
 
     try {
-      // First save the design
       const design = await new Promise((resolve) => {
         emailEditorRef.current.editor.saveDesign(resolve);
       });
       setEmailTemplate(design);
 
-      // Then export HTML
       const data = await new Promise((resolve) => {
         emailEditorRef.current.editor.exportHtml(resolve);
       });
-      
+
       const { html } = data;
       setEmailHtml(html);
       setIsEditing(false);
@@ -86,44 +76,35 @@ const EmailEditorComponent = () => {
     if (!emailEditorRef.current?.editor) return;
 
     emailEditorRef.current.editor.exportHtml((data) => {
-      const { html } = data;
-      console.log("Exported HTML:", html);
+      console.log("Exported HTML:", data.html);
     });
   };
 
   return (
-    <div
-      style={{ backgroundColor: COLORS.background }}
-      className="h-full w-full flex flex-col"
-    >
-      <div onClick={() => navigate("/send-mails")} className="flex gap-4 p-4">
-        <div className="bg-[#1EAE98] flex items-center justify-content-center cursor-pointer text-white px-2 py-2 rounded">
+    <div className="flex h-full w-full flex-col">
+      <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-white/[0.02] p-4">
+        <button
+          type="button"
+          onClick={() => navigate("/send-mails")}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-slate-300 hover:bg-white/[0.06] cursor-pointer"
+        >
           <IoIosArrowBack />
-        </div>
-        <button
-          onClick={handleSave}
-          className="bg-[#1EAE98] text-white px-4 py-2 rounded cursor-pointer"
-        >
+        </button>
+        <Button variant="secondary" onClick={handleSave}>
           Save Template
-        </button>
-        <button
-          onClick={handleSaveAndContinue}
-          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
-        >
+        </Button>
+        <Button variant="primary" onClick={handleSaveAndContinue}>
           Save & Continue
-        </button>
-        <button
-          onClick={exportHtml}
-          className="bg-purple-600 text-white px-4 py-2 rounded cursor-pointer"
-        >
+        </Button>
+        <Button variant="secondary" onClick={exportHtml}>
           Export HTML
-        </button>
+        </Button>
       </div>
 
       <EmailEditor
         ref={emailEditorRef}
         style={{ flex: 1 }}
-        onLoad={onEditorLoad} // Add this callback
+        onLoad={onEditorLoad}
         options={{
           appearance: {
             theme: "dark",
@@ -133,7 +114,7 @@ const EmailEditorComponent = () => {
               },
             },
           },
-          customCSS: [`.my-button { background-color: ${COLORS.primary}; }`],
+          customCSS: [".my-button { background-color: #8b5cf6; }"],
         }}
       />
     </div>

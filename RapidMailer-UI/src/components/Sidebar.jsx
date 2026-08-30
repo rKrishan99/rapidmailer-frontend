@@ -1,41 +1,112 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  RiDashboardLine,
+  RiAppsLine,
+  RiMapPin2Line,
+  RiGlobalLine,
+  RiMailCheckLine,
+  RiSendPlaneLine,
+  RiCodeSSlashLine,
+  RiShieldCheckLine,
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
+} from "react-icons/ri";
 import { images } from "../assets/assets";
-import { sidebarContent } from "../assets/sidebarWidgets";
-import { useNavigate } from "react-router-dom";
 import { SidebarExpandContext } from "../context/SidebarExpandContext";
-import { COLORS } from "../constants/theme";
+
+const NAV_GROUPS = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", path: "/dashbord", icon: RiDashboardLine },
+      { title: "All Tools", path: "/tools", icon: RiAppsLine },
+    ],
+  },
+  {
+    label: "Lead Generation",
+    items: [
+      { title: "Google Maps", path: "/gmap-data", icon: RiMapPin2Line },
+      { title: "Web Search", path: "/web-data", icon: RiGlobalLine },
+    ],
+  },
+  {
+    label: "Email",
+    items: [
+      { title: "Verify Emails", path: "/verify-mails", icon: RiMailCheckLine },
+      { title: "Send Campaign", path: "/send-mails", icon: RiSendPlaneLine },
+    ],
+  },
+  {
+    label: "Website Intel",
+    items: [
+      { title: "Tech Detector", path: "/tech-detector", icon: RiCodeSSlashLine },
+      { title: "Website Audit", path: "/website-audit", icon: RiShieldCheckLine },
+    ],
+  },
+];
 
 const Sidebar = () => {
-
   const { isExpand, setIsExpand } = useContext(SidebarExpandContext);
-
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
-    <div style={{ backgroundColor: COLORS.primary }} className={`${isExpand ? "w-[220px]" : "w-[60px]"} overflow-hidden transition-all duration-300 h-screen`}>
-      <div
-        onClick={() => navigate("/dashbord")}
-        style={{ backgroundColor: COLORS.lightGreeen }}
-        className="flex w-full flex-row p-2 gap-3 items-center cursor-pointer"
-      >
-        <img className="w-[40px]" src={images.dashboard} alt="" />
-        <h1 className={`${ isExpand ? "font-bold text-lg text-[#03288b]" : "hidden"}`}>Dashboard</h1>
+    <aside
+      className={`${
+        isExpand ? "w-[240px]" : "w-[76px]"
+      } glass-panel relative z-10 flex h-screen flex-col border-r border-white/10 bg-[#080b16]/80 transition-all duration-300`}
+    >
+      <div className="flex items-center gap-3 px-4 py-5">
+        <img
+          className={`${isExpand ? "w-[150px]" : "w-0"} overflow-hidden transition-all duration-300`}
+          src={images.logo}
+          alt="RapidMailer"
+        />
+        <button
+          type="button"
+          onClick={() => setIsExpand(!isExpand)}
+          className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-white/[0.06] hover:text-white cursor-pointer"
+        >
+          {isExpand ? <RiMenuFoldLine /> : <RiMenuUnfoldLine />}
+        </button>
       </div>
-      <div className={`${isExpand ? "px-2 pt-3" : "flex flex-col items-center px-2 pt-3"}`}>
-        <div className="flex flex-col">
-          {sidebarContent.map((item, index) => (
-            <div
-              key={index}
-              onClick={() => navigate(item.path)}
-              className="flex gap-2 p-2 rounded-[5px] items-center cursor-pointer hover:bg-[#A9F1DF] focus:bg-[#A9F1DF]"
-            >
-              <img className="w-[20px]" src={item.icon} />
-              <span className={`${isExpand ? "font-semibold text-lg" : "hidden"}`}>{item.title}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 pb-6">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="flex flex-col gap-1">
+            {isExpand && (
+              <span className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                {group.label}
+              </span>
+            )}
+            {group.items.map((item) => {
+              const active = location.pathname === item.path;
+              const Icon = item.icon;
+              return (
+                <button
+                  type="button"
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  title={!isExpand ? item.title : undefined}
+                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                    active
+                      ? "bg-white/[0.08] text-white"
+                      : "text-slate-400 hover:bg-white/[0.05] hover:text-white"
+                  } ${isExpand ? "" : "justify-center"}`}
+                >
+                  {active && (
+                    <span className="grad-bg absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full" />
+                  )}
+                  <Icon className={`text-lg ${active ? "text-accent-400" : ""}`} />
+                  {isExpand && <span>{item.title}</span>}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+    </aside>
   );
 };
 

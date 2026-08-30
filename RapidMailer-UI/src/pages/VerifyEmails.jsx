@@ -1,9 +1,13 @@
-import React, { useContext, useState } from "react";
-import StickyHeadTable from "../components/EmailTable";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
+import { RiUpload2Line, RiDeleteBinLine, RiPlayFill, RiMailCheckLine } from "react-icons/ri";
+import StickyHeadTable from "../components/EmailTable";
 import { EmailsVerifyContext } from "../context/EmailsVerifyContext";
-import { COLORS } from "../constants/theme";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import PageHeader from "../components/ui/PageHeader";
+import EmptyState from "../components/ui/EmptyState";
 
 const VerifyEmails = () => {
   const navigate = useNavigate();
@@ -32,61 +36,68 @@ const VerifyEmails = () => {
     }
 
     setIsDataEmptyError(false);
-
-    // Extract emails from emailData
     const emails = emailData.map((row) => row.email);
-
-    // Call the validateEmails function
     validateEmails(emails);
-
     navigate("/validation-results");
   };
 
   return (
-    <div
-      style={{ backgroundColor: COLORS.background }}
-      className="flex flex-col lg:flex-row p-6 h-full"
-    >
-      <div className="flex flex-col lg:gap-4 lg:flex-1">
-        <h1 className="text-lg font-bold">Email Validation</h1>
-        <div className="flex flex-row mt-12 gap-4 items-center">
-          <h1 className="text-lg font-semibold">Add Email List</h1>
-          <label
-            htmlFor="csv-file-input"
-            className="bg-[#1EAE98] cursor-pointer px-4 py-1 rounded-sm text-white"
-          >
-            Choose CSV File
-          </label>
-          <input
-            id="csv-file-input"
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          <button
-            onClick={() => setEmailData([])}
-            className="bg-red-700 text-white px-3 rounded-sm cursor-pointer"
-          >
-            Clear
-          </button>
-        </div>
-        {isDataEmptyError ? (
-          <span className="mt-6 text-red-500">Pease add a email list.</span>
-        ) : (
-          <></>
-        )}
+    <div className="flex flex-col gap-8 p-6 md:p-10">
+      <PageHeader
+        eyebrow="Email"
+        title="Email Validation"
+        description="Upload a CSV of email addresses to check which ones are deliverable."
+      />
 
-        <button
-          onClick={handleStart}
-          className="bg-[#1EAE98] mt-10 text-white rounded-sm w-[100px] cursor-pointer"
-        >
-          Start
-        </button>
-      </div>
-      <div className="mt-12 lg:mt-0 flex-1">
-        <div className="lg:mt-20">
-          <StickyHeadTable data={emailData} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card className="flex flex-col gap-5 p-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="csv-file-input"
+              className="grad-bg inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 hover:brightness-110"
+            >
+              <RiUpload2Line />
+              Choose CSV File
+            </label>
+            <input
+              id="csv-file-input"
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <Button variant="danger" onClick={() => setEmailData([])}>
+              <RiDeleteBinLine />
+              Clear
+            </Button>
+          </div>
+
+          {emailData.length > 0 && (
+            <p className="text-sm text-slate-400">{emailData.length} emails loaded.</p>
+          )}
+
+          {isDataEmptyError && (
+            <span className="text-sm text-rose-400">Please add an email list.</span>
+          )}
+
+          <div>
+            <Button onClick={handleStart}>
+              <RiPlayFill />
+              Start
+            </Button>
+          </div>
+        </Card>
+
+        <div>
+          {emailData.length > 0 ? (
+            <StickyHeadTable data={emailData} />
+          ) : (
+            <EmptyState
+              icon={RiMailCheckLine}
+              title="No emails loaded"
+              description="Upload a CSV file to preview the addresses here."
+            />
+          )}
         </div>
       </div>
     </div>
