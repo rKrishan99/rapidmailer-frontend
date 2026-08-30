@@ -11,6 +11,7 @@ import {
   RiShieldCheckLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
+  RiSettings4Line,
 } from "react-icons/ri";
 import { images } from "../assets/assets";
 import { SidebarExpandContext } from "../context/SidebarExpandContext";
@@ -46,6 +47,26 @@ const NAV_GROUPS = [
   },
 ];
 
+const NavButton = ({ item, active, isExpand, onClick }) => {
+  const Icon = item.icon;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={!isExpand ? item.title : undefined}
+      className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+        active ? "bg-white/[0.08] text-white" : "text-slate-400 hover:bg-white/[0.05] hover:text-white"
+      } ${isExpand ? "" : "justify-center"}`}
+    >
+      {active && <span className="grad-bg absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full" />}
+      <Icon className={`text-lg ${active ? "text-accent-400" : ""}`} />
+      {isExpand && <span>{item.title}</span>}
+    </button>
+  );
+};
+
+const SETTINGS_ITEM = { title: "Settings", path: "/settings", icon: RiSettings4Line };
+
 const Sidebar = () => {
   const { isExpand, setIsExpand } = useContext(SidebarExpandContext);
   const navigate = useNavigate();
@@ -80,32 +101,27 @@ const Sidebar = () => {
                 {group.label}
               </span>
             )}
-            {group.items.map((item) => {
-              const active = location.pathname === item.path;
-              const Icon = item.icon;
-              return (
-                <button
-                  type="button"
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  title={!isExpand ? item.title : undefined}
-                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-                    active
-                      ? "bg-white/[0.08] text-white"
-                      : "text-slate-400 hover:bg-white/[0.05] hover:text-white"
-                  } ${isExpand ? "" : "justify-center"}`}
-                >
-                  {active && (
-                    <span className="grad-bg absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full" />
-                  )}
-                  <Icon className={`text-lg ${active ? "text-accent-400" : ""}`} />
-                  {isExpand && <span>{item.title}</span>}
-                </button>
-              );
-            })}
+            {group.items.map((item) => (
+              <NavButton
+                key={item.path}
+                item={item}
+                isExpand={isExpand}
+                active={location.pathname === item.path}
+                onClick={() => navigate(item.path)}
+              />
+            ))}
           </div>
         ))}
       </nav>
+
+      <div className="border-t border-white/10 px-3 py-3">
+        <NavButton
+          item={SETTINGS_ITEM}
+          isExpand={isExpand}
+          active={location.pathname === SETTINGS_ITEM.path}
+          onClick={() => navigate(SETTINGS_ITEM.path)}
+        />
+      </div>
     </aside>
   );
 };

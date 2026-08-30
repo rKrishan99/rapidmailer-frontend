@@ -10,6 +10,7 @@ import CreateEmail from "./CreateEmail";
 import SentResult from "./SentResult";
 import TechDetector from "./TechDetector";
 import WebsiteAudit from "./WebsiteAudit";
+import Settings from "./Settings";
 
 const Home = () => (
   <Routes>
@@ -25,6 +26,7 @@ const Home = () => (
     <Route path="/sent-results" element={<SentResult />} />
     <Route path="/tech-detector" element={<TechDetector />} />
     <Route path="/website-audit" element={<WebsiteAudit />} />
+    <Route path="/settings" element={<Settings />} />
   </Routes>
 );
 

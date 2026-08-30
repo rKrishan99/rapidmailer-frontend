@@ -11,6 +11,7 @@ import { UploadedListsProvider } from "./context/UploadedListsContext.jsx";
 import { EmailsSendProvider } from "./context/EmailsSendContext.jsx";
 import { TechDetectorProvider } from "./context/TechDetectorContext.jsx";
 import { WebsiteAuditProvider } from "./context/WebsiteAuditContext.jsx";
+import { SettingsProvider } from "./context/SettingsContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -23,7 +24,9 @@ createRoot(document.getElementById("root")).render(
                 <UploadedListsProvider>
                   <TechDetectorProvider>
                     <WebsiteAuditProvider>
-                      <App />
+                      <SettingsProvider>
+                        <App />
+                      </SettingsProvider>
                     </WebsiteAuditProvider>
                   </TechDetectorProvider>
                 </UploadedListsProvider>
