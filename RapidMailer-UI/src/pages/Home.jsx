@@ -10,6 +10,7 @@ import SendEmails from "./SendEmails";
 import ValidationResult from "./ValidationResult";
 import CreateEmail from "./CreateEmail";
 import SentResult from "./SentResult";
+import TechDetector from "./TechDetector";
 
 const Home = () => {
   return (
@@ -28,6 +29,7 @@ const Home = () => {
           <Route path="/validation-results" element={<ValidationResult />} />
           <Route path="/create-email" element={<CreateEmail />} />
           <Route path="/sent-results" element={<SentResult />} />
+          <Route path="/tech-detector" element={<TechDetector />} />
         </Routes>
       </div>
     </div>

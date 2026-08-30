@@ -2,6 +2,7 @@ import MapIcon from './map.svg';
 import WebIcon from './web.svg';
 import ValidIcon from './valid.svg';
 import SendIcon from './send.svg';
+import TechStackIcon from './techstack.svg';
 
 export const toolInfo = [
     {
@@ -23,5 +24,10 @@ export const toolInfo = [
         icon: SendIcon,
         title: 'Bulk Email Sending',
         path: '/send-mails'
+    },
+    {
+        icon: TechStackIcon,
+        title: 'Website Tech Stack Detector',
+        path: '/tech-detector'
     }
 ];
