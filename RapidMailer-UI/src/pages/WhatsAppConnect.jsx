@@ -86,7 +86,7 @@ const AccountCard = ({ account, onSaved }) => {
             <h3 className="font-semibold text-white">{account.label || "Untitled account"}</h3>
             <p className="text-sm text-slate-400">
               {account.verifiedDisplayName
-                ? `"${account.verifiedDisplayName}" · ${account.verifiedPhoneNumber}`
+                ? `"${account.verifiedDisplayName}"${account.verifiedPhoneNumber ? ` · ${account.verifiedPhoneNumber}` : ""}`
                 : account.phoneNumberId}
             </p>
           </div>

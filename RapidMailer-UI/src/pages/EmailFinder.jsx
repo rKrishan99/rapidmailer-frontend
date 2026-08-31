@@ -9,10 +9,14 @@ import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
 
+// Mirrors the backend's own /enrich-emails-bulk cap (see emailExtractorRoute.js).
+const MAX_BATCH = 300;
+
 const EmailFinder = () => {
   const { leads, loading, error, findEmails } = useContext(EmailFinderContext);
   const [showAlert, setShowAlert] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [pendingRowCount, setPendingRowCount] = useState(0);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -22,10 +26,12 @@ const EmailFinder = () => {
     const rows = await parseLeadsCsv(file);
     if (rows.length === 0) {
       setShowAlert(true);
+      event.target.value = "";
       return;
     }
     setShowAlert(false);
-    findEmails(rows);
+    setPendingRowCount(rows.length);
+    findEmails(rows.slice(0, MAX_BATCH));
     event.target.value = "";
   };
 
@@ -67,6 +73,12 @@ const EmailFinder = () => {
         </p>
         {showAlert && (
           <span className="text-sm text-rose-400">That CSV looks empty — please check the file.</span>
+        )}
+        {pendingRowCount > MAX_BATCH && (
+          <span className="text-sm text-amber-400">
+            That CSV has {pendingRowCount} leads — only the first {MAX_BATCH} were sent (the site
+            visits run one CSV at a time, so split the rest into another upload).
+          </span>
         )}
       </Card>
 

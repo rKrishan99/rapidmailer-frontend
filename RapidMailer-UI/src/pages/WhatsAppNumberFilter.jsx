@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RiUpload2Line, RiDownloadLine, RiFilterLine, RiInformationLine } from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { parseLeadsCsv, downloadLeadsCsv, getRowPhone, getRowPhoneColumn } from "../utils/leadCsv";
@@ -42,6 +42,17 @@ const WhatsAppNumberFilter = () => {
   const [submitError, setSubmitError] = useState(null);
   const [filtering, setFiltering] = useState(false);
   const [results, setResults] = useState([]);
+
+  // The check can take a while (real WhatsApp sends, paced out) — if the
+  // user navigates away before it resolves, don't setState on an unmounted
+  // component. The send itself still completes server-side either way;
+  // this just avoids updating a page that's no longer showing.
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const headers = useMemo(() => (rows[0] ? Object.keys(rows[0]) : []), [rows]);
   const onWhatsapp = useMemo(() => results.filter((r) => r.status === "sent"), [results]);
@@ -106,6 +117,7 @@ const WhatsAppNumberFilter = () => {
         defaultCountryCode,
       },
     });
+    if (!isMountedRef.current) return;
     setFiltering(false);
 
     if (!res.ok) {

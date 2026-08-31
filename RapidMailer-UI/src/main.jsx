@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { GoogleMapDataProvider } from "./context/MapDataContext.jsx";
 import { WebDataProvider } from "./context/WebDataContext.jsx";
@@ -18,6 +19,7 @@ import { EmailAccountsProvider } from "./context/EmailAccountsContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
 
 createRoot(document.getElementById("root")).render(
+  <ErrorBoundary>
   <BrowserRouter>
     <GoogleMapDataProvider>
       <WebDataProvider>
@@ -49,4 +51,5 @@ createRoot(document.getElementById("root")).render(
       </WebDataProvider>
     </GoogleMapDataProvider>
   </BrowserRouter>
+  </ErrorBoundary>
 );
