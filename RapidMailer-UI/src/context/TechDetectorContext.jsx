@@ -14,9 +14,7 @@ export function TechDetectorProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/detect-tech`, {
-        params: { url },
-      });
+      const response = await axios.post(`${API_BASE_URL}/detect-tech`, { url });
       setResults([response.data.result]);
     } catch (err) {
       setError(err.response?.data?.error || err.message || "Failed to detect website technology.");

@@ -120,13 +120,29 @@ export function getRowPhoneColumn(row) {
 // Parses an uploaded CSV into an array of plain row objects (header row ->
 // keys). Keeps every column the file has, not just LEAD_COLUMNS, so a tool
 // never silently drops data it doesn't recognize.
+//
+// Runs in a Web Worker (worker: true) so a large file (thousands of rows —
+// easy to hit chaining Google Maps -> Email Finder exports) doesn't freeze
+// the UI thread while parsing. Note: PapaParse's worker mode can't carry
+// function-valued options like `transformHeader` across to the worker (only
+// `step`/`chunk`/`complete`/`error` are proxied), so header trimming is done
+// as a post-processing pass here instead — same end result, worker-safe.
 export function parseLeadsCsv(file) {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (h) => h.trim(),
-      complete: (result) => resolve(result.data || []),
+      worker: true,
+      complete: (result) => {
+        const rows = (result.data || []).map((row) => {
+          const trimmed = {};
+          for (const key of Object.keys(row)) {
+            trimmed[key.trim()] = row[key];
+          }
+          return trimmed;
+        });
+        resolve(rows);
+      },
       error: reject,
     });
   });

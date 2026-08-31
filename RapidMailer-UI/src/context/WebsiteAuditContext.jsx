@@ -14,9 +14,7 @@ export function WebsiteAuditProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/audit-website`, {
-        params: { url },
-      });
+      const response = await axios.post(`${API_BASE_URL}/audit-website`, { url });
       setResults([response.data.result]);
     } catch (err) {
       setError(err.response?.data?.error || err.message || "Failed to audit website.");
