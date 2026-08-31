@@ -32,7 +32,7 @@ const NAV_GROUPS = [
   {
     label: "Accounts",
     items: [
-      { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiLinksLine },
+      { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiWhatsappLine },
       { title: "Email Accounts", path: "/email-accounts", icon: RiMailCheckLine },
     ],
   },

@@ -8,7 +8,6 @@ export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [testingSmtp, setTestingSmtp] = useState(false);
   const [loadError, setLoadError] = useState(null);
 
   const fetchSettings = useCallback(async () => {
@@ -41,27 +40,13 @@ export function SettingsProvider({ children }) {
     }
   };
 
-  const testSmtp = async ({ smtp, to } = {}) => {
-    setTestingSmtp(true);
-    try {
-      const response = await axios.post(`${API_BASE}/settings/test-smtp`, { smtp, to });
-      return { ok: true, message: response.data.message || "Test email sent." };
-    } catch (err) {
-      return { ok: false, message: err.response?.data?.error || err.message || "SMTP test failed." };
-    } finally {
-      setTestingSmtp(false);
-    }
-  };
-
   const value = {
     settings,
     loading,
     saving,
-    testingSmtp,
     loadError,
     refresh: fetchSettings,
     saveSettings,
-    testSmtp,
   };
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

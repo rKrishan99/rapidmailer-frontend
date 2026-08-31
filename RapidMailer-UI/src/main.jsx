@@ -14,6 +14,7 @@ import { EmailsSendProvider } from "./context/EmailsSendContext.jsx";
 import { TechDetectorProvider } from "./context/TechDetectorContext.jsx";
 import { WebsiteAuditProvider } from "./context/WebsiteAuditContext.jsx";
 import { WhatsAppProvider } from "./context/WhatsAppContext.jsx";
+import { EmailAccountsProvider } from "./context/EmailAccountsContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -30,9 +31,11 @@ createRoot(document.getElementById("root")).render(
                       <TechDetectorProvider>
                         <WebsiteAuditProvider>
                           <WhatsAppProvider>
-                            <SettingsProvider>
-                              <App />
-                            </SettingsProvider>
+                            <EmailAccountsProvider>
+                              <SettingsProvider>
+                                <App />
+                              </SettingsProvider>
+                            </EmailAccountsProvider>
                           </WhatsAppProvider>
                         </WebsiteAuditProvider>
                       </TechDetectorProvider>

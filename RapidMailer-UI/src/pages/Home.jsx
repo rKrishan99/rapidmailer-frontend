@@ -15,6 +15,7 @@ import WebsiteAudit from "./WebsiteAudit";
 import WhatsAppConnect from "./WhatsAppConnect";
 import WhatsAppSender from "./WhatsAppSender";
 import WhatsAppNumberFilter from "./WhatsAppNumberFilter";
+import EmailAccounts from "./EmailAccounts";
 import Settings from "./Settings";
 
 const Home = () => (
@@ -36,6 +37,7 @@ const Home = () => (
     <Route path="/whatsapp-connect" element={<WhatsAppConnect />} />
     <Route path="/whatsapp-filter" element={<WhatsAppNumberFilter />} />
     <Route path="/whatsapp-sender" element={<WhatsAppSender />} />
+    <Route path="/email-accounts" element={<EmailAccounts />} />
     <Route path="/settings" element={<Settings />} />
   </Routes>
 );

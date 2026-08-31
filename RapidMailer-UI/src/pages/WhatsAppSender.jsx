@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { RiUpload2Line, RiDownloadLine, RiWhatsappLine, RiInformationLine } from "react-icons/ri";
+import {
+  RiUpload2Line,
+  RiDownloadLine,
+  RiWhatsappLine,
+  RiInformationLine,
+  RiImageLine,
+  RiVideoLine,
+  RiForbidLine,
+} from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { parseLeadsCsv, downloadLeadsCsv, getRowPhone, getRowPhoneColumn } from "../utils/leadCsv";
 import ShowWhatsAppResultsTable from "../components/ShowWhatsAppResultsTable";
@@ -30,6 +38,16 @@ const WhatsAppSender = () => {
   const [templateLanguage, setTemplateLanguage] = useState("en_US");
   const [bodyParamFields, setBodyParamFields] = useState(["", "", ""]);
   const [textMessage, setTextMessage] = useState("");
+
+  // Media header — Meta's official template header types are TEXT / IMAGE /
+  // VIDEO / DOCUMENT / LOCATION. RapidMailer supports IMAGE and VIDEO here,
+  // supplied as a public link at send time (per Meta's own API shape), which
+  // is why it can be either one fixed URL for the whole batch, or a
+  // different URL per lead pulled from a CSV column.
+  const [headerType, setHeaderType] = useState("none"); // none | image | video
+  const [headerSource, setHeaderSource] = useState("fixed"); // fixed | column
+  const [headerMediaUrl, setHeaderMediaUrl] = useState("");
+  const [headerMediaUrlField, setHeaderMediaUrlField] = useState("");
 
   const [defaultCountryCode, setDefaultCountryCode] = useState("94");
   const [batchSize, setBatchSize] = useState(5);
@@ -82,6 +100,16 @@ const WhatsAppSender = () => {
       setSubmitError("Enter a message to send.");
       return;
     }
+    if (mode === "template" && headerType !== "none") {
+      if (headerSource === "fixed" && !headerMediaUrl.trim()) {
+        setSubmitError(`Enter a public ${headerType} URL, or switch to "different per lead" and map a column.`);
+        return;
+      }
+      if (headerSource === "column" && !headerMediaUrlField) {
+        setSubmitError(`Pick which CSV column holds the ${headerType} URL for each lead.`);
+        return;
+      }
+    }
 
     const recipients = rows.slice(0, MAX_BATCH).map((row) => ({ ...row, phone: getRowPhone(row) }));
 
@@ -92,6 +120,15 @@ const WhatsAppSender = () => {
             templateName: templateName.trim(),
             templateLanguage: templateLanguage.trim() || "en_US",
             bodyParamFields: bodyParamFields.filter(Boolean),
+            header:
+              headerType !== "none"
+                ? {
+                    type: headerType,
+                    ...(headerSource === "column"
+                      ? { mediaUrlField: headerMediaUrlField }
+                      : { mediaUrl: headerMediaUrl.trim() }),
+                  }
+                : null,
           }
         : { mode: "text", text: textMessage };
 
@@ -170,7 +207,9 @@ const WhatsAppSender = () => {
             <h3 className="font-semibold text-white">Message</h3>
             <p className="text-sm text-slate-400">
               Cold outreach requires an approved <span className="text-slate-300">template</span> — Meta rejects
-              plain text sent to someone who hasn't messaged you first.
+              plain text sent to someone who hasn't messaged you first. Emoji work anywhere below, no setup needed.
+              Polls aren't offered by WhatsApp's official API at all (not here, not in any template) — a CRM tool
+              claiming otherwise isn't using this same official API.
             </p>
           </div>
         </div>
@@ -239,6 +278,112 @@ const WhatsAppSender = () => {
                 </div>
               </div>
             )}
+
+            <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <div>
+                <span className="text-sm font-medium text-slate-300">Header media (optional)</span>
+                <p className="text-xs text-slate-500">
+                  Attach an image or video to the template's header — only if the template itself was created
+                  with a matching IMAGE/VIDEO header in Meta Business Manager.
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                {[
+                  { id: "none", label: "None", icon: RiForbidLine },
+                  { id: "image", label: "Image", icon: RiImageLine },
+                  { id: "video", label: "Video", icon: RiVideoLine },
+                ].map((option) => {
+                  const OptionIcon = option.icon;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setHeaderType(option.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        headerType === option.id
+                          ? "grad-bg text-white"
+                          : "bg-white/[0.05] text-slate-300 hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      <OptionIcon />
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {headerType !== "none" && (
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setHeaderSource("fixed")}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        headerSource === "fixed"
+                          ? "bg-violet-500/20 text-violet-200"
+                          : "bg-white/[0.05] text-slate-400 hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      Same {headerType} for everyone
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHeaderSource("column")}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        headerSource === "column"
+                          ? "bg-violet-500/20 text-violet-200"
+                          : "bg-white/[0.05] text-slate-400 hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      Different per lead (CSV column)
+                    </button>
+                  </div>
+
+                  {headerSource === "fixed" ? (
+                    <Input
+                      label={`Public ${headerType} URL`}
+                      placeholder="https://your-site.com/banner.jpg"
+                      value={headerMediaUrl}
+                      onChange={(e) => setHeaderMediaUrl(e.target.value)}
+                    />
+                  ) : (
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-xs text-slate-500">{`Column holding each lead's ${headerType} URL`}</span>
+                      <select
+                        value={headerMediaUrlField}
+                        onChange={(e) => setHeaderMediaUrlField(e.target.value)}
+                        className="rounded-xl bg-white/[0.05] border border-white/10 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-violet-400/60"
+                      >
+                        <option value="">— choose a column —</option>
+                        {headers.map((h) => (
+                          <option key={h} value={h}>
+                            {h}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+
+                  {headerSource === "fixed" && headerMediaUrl.trim() && headerType === "image" && (
+                    <img
+                      src={headerMediaUrl.trim()}
+                      alt="Header preview"
+                      className="h-24 w-24 rounded-lg border border-white/10 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
+
+                  <p className="flex items-start gap-2 text-xs text-slate-500">
+                    <RiInformationLine className="mt-0.5 shrink-0" />
+                    The URL must be publicly reachable over HTTPS (Meta's servers fetch it directly) — your own
+                    site, or any host that serves the file with no login wall.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <p className="flex items-start gap-2 text-xs text-slate-500">
               <RiInformationLine className="mt-0.5 shrink-0" />

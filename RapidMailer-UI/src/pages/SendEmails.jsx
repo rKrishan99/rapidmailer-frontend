@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import {
@@ -14,6 +14,8 @@ import { useEmailContext } from "../context/EmailContext";
 import { UploadedListsContext } from "../context/UploadedListsContext";
 import { EmailsSendContext } from "../context/EmailsSendContext";
 import { parseLeadsCsv } from "../utils/leadCsv";
+import EmailAccountSelect from "../components/EmailAccountSelect";
+import { useEmailAccounts } from "../context/EmailAccountsContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Toggle from "../components/ui/Toggle";
@@ -26,6 +28,7 @@ const SendEmails = () => {
   const [isDataEmptyError, setIsDataEmptyError] = useState(false);
   const [isEmailEmptyError, setIsEmailEmptyError] = useState(false);
   const [isSubjectEmptyError, setIsSubjectEmptyError] = useState(false);
+  const [isAccountEmptyError, setIsAccountEmptyError] = useState(false);
   const { emailTemplate, emailHtml, subject, setIsEditing } = useEmailContext();
   const { emailList, setEmailList } = useContext(UploadedListsContext);
   const { setResponse, SendEmails } = useContext(EmailsSendContext);
@@ -36,6 +39,14 @@ const SendEmails = () => {
   const [sendMode, setSendMode] = useState("blast");
   const [records, setRecords] = useState([]);
   const [recordsFileName, setRecordsFileName] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const { accounts } = useEmailAccounts();
+
+  // Default to the first (primary) account once accounts load, matching the
+  // backend's own default-to-first-account behavior when none is picked.
+  useEffect(() => {
+    if (!accountId && accounts.length > 0) setAccountId(accounts[0].id);
+  }, [accounts, accountId]);
 
   const handleEditEmail = () => {
     setIsEditing(true);
@@ -75,9 +86,14 @@ const SendEmails = () => {
       setIsSubjectEmptyError(true);
       return;
     }
+    if (accounts.length > 0 && !accountId) {
+      setIsAccountEmptyError(true);
+      return;
+    }
 
     setIsEmailEmptyError(false);
     setIsSubjectEmptyError(false);
+    setIsAccountEmptyError(false);
 
     const mailTemplate = { subject, html: emailHtml };
 
@@ -90,7 +106,7 @@ const SendEmails = () => {
 
       navigate("/sent-results");
       setResponse(null);
-      SendEmails({ emailTemplate: mailTemplate, mode: "personalized", records })
+      SendEmails({ emailTemplate: mailTemplate, mode: "personalized", records, accountId })
         .then((data) => {
           setResponse(
             `Sent ${data.stats.sent}/${data.stats.total} personalized emails successfully.` +
@@ -109,7 +125,7 @@ const SendEmails = () => {
 
       navigate("/sent-results");
       setResponse(null);
-      SendEmails({ emailTemplate: mailTemplate, emails })
+      SendEmails({ emailTemplate: mailTemplate, emails, accountId })
         .then((data) => {
           setResponse(
             `Sent ${data.stats.sent}/${data.stats.total} emails successfully.` +
@@ -158,6 +174,11 @@ const SendEmails = () => {
           label="Personalized (mail-merge)"
           description="Each recipient gets their own subject/body filled in from their CSV row — e.g. {{business_name}}, {{score}}. Off = same email to everyone."
         />
+
+        <EmailAccountSelect value={accountId} onChange={setAccountId} />
+        {isAccountEmptyError && (
+          <span className="text-sm text-rose-400">Pick which account to send this campaign from.</span>
+        )}
       </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
