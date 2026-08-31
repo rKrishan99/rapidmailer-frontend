@@ -71,7 +71,6 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-          <img className="w-full max-w-[380px] flex-1" src={images.bannerImg} alt="" />
         </div>
       </Card>
 
