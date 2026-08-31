@@ -13,16 +13,12 @@ export function WebDataProvider({children}){
     const [error, setError] = useState(null);
 
     const fetchWebData = async(keyword, location) => {
-        console.log('here is fetchWebMapData...', keyword , location);
         setLoading(true);
         try{
-            const response = await axios.get(`${API_BASE_URL}/extract-emails`, {
-                params: { keyword, location }
-            });
-            console.log("response.data:", response.data);
+            const response = await axios.post(`${API_BASE_URL}/extract-emails`, { keyword, location });
             setWebData(response.data);
         }catch(err){
-            setError(err.message || "An error occurred while fetching google web data.");
+            setError(err.response?.data?.error || err.message || "An error occurred while fetching google web data.");
         }finally{
             setLoading(false);
         }

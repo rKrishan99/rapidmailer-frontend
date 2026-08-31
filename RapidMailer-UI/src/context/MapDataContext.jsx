@@ -13,16 +13,16 @@ export function GoogleMapDataProvider({children}){
     const [error, setError] = useState(null);
 
     const fetchGoogleMapData = async(keyword, location) => {
-        console.log('here is fetchGoogleMapData...', keyword , location);
         setLoading(true);
         try{
-            const response = await axios.get(`${API_BASE_URL}/google-maps`, {
-                params: { keyword, location }
+            // Backend field is `query`, not `keyword` — the two must match.
+            const response = await axios.post(`${API_BASE_URL}/google-maps`, {
+                query: keyword,
+                location,
             });
-            console.log("response.data:", response.data);
             setGoogleMapData(response.data);
         }catch(err){
-            setError(err.message || "An error occurred while fetching google map data.");
+            setError(err.response?.data?.error || err.message || "An error occurred while fetching google map data.");
         }finally{
             setLoading(false);
         }
