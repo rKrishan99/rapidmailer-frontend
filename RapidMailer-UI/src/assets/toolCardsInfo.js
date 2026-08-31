@@ -7,6 +7,7 @@ import {
   RiCodeSSlashLine,
   RiShieldCheckLine,
   RiShareForwardLine,
+  RiWhatsappLine,
 } from "react-icons/ri";
 
 export const toolInfo = [
@@ -57,5 +58,11 @@ export const toolInfo = [
     title: "Bulk Website Audit",
     description: "Check performance, security and SEO basics, then filter out dead leads.",
     path: "/website-audit",
+  },
+  {
+    icon: RiWhatsappLine,
+    title: "WhatsApp Bulk Sender (from CSV)",
+    description: "Upload a lead list and message it via the official WhatsApp Business API, at a safe pace.",
+    path: "/whatsapp-sender",
   },
 ];

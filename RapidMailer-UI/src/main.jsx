@@ -13,6 +13,7 @@ import { UploadedListsProvider } from "./context/UploadedListsContext.jsx";
 import { EmailsSendProvider } from "./context/EmailsSendContext.jsx";
 import { TechDetectorProvider } from "./context/TechDetectorContext.jsx";
 import { WebsiteAuditProvider } from "./context/WebsiteAuditContext.jsx";
+import { WhatsAppProvider } from "./context/WhatsAppContext.jsx";
 import { SettingsProvider } from "./context/SettingsContext.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -28,9 +29,11 @@ createRoot(document.getElementById("root")).render(
                     <UploadedListsProvider>
                       <TechDetectorProvider>
                         <WebsiteAuditProvider>
-                          <SettingsProvider>
-                            <App />
-                          </SettingsProvider>
+                          <WhatsAppProvider>
+                            <SettingsProvider>
+                              <App />
+                            </SettingsProvider>
+                          </WhatsAppProvider>
                         </WebsiteAuditProvider>
                       </TechDetectorProvider>
                     </UploadedListsProvider>

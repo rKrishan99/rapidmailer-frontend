@@ -11,6 +11,8 @@ import {
   RiSendPlaneLine,
   RiCodeSSlashLine,
   RiShieldCheckLine,
+  RiWhatsappLine,
+  RiLinksLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiSettings4Line,
@@ -47,6 +49,15 @@ const NAV_GROUPS = [
     items: [
       { title: "Tech Detector", path: "/tech-detector", icon: RiCodeSSlashLine },
       { title: "Website Audit", path: "/website-audit", icon: RiShieldCheckLine },
+    ],
+  },
+  {
+    label: "WhatsApp",
+    items: [
+      // One shared connection powers every WhatsApp tool below it — connect
+      // once here rather than per tool.
+      { title: "Connect WhatsApp", path: "/whatsapp-connect", icon: RiLinksLine },
+      { title: "Bulk Sender", path: "/whatsapp-sender", icon: RiWhatsappLine },
     ],
   },
 ];

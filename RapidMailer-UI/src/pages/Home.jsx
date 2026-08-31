@@ -12,6 +12,8 @@ import CreateEmail from "./CreateEmail";
 import SentResult from "./SentResult";
 import TechDetector from "./TechDetector";
 import WebsiteAudit from "./WebsiteAudit";
+import WhatsAppConnect from "./WhatsAppConnect";
+import WhatsAppSender from "./WhatsAppSender";
 import Settings from "./Settings";
 
 const Home = () => (
@@ -30,6 +32,8 @@ const Home = () => (
     <Route path="/sent-results" element={<SentResult />} />
     <Route path="/tech-detector" element={<TechDetector />} />
     <Route path="/website-audit" element={<WebsiteAudit />} />
+    <Route path="/whatsapp-connect" element={<WhatsAppConnect />} />
+    <Route path="/whatsapp-sender" element={<WhatsAppSender />} />
     <Route path="/settings" element={<Settings />} />
   </Routes>
 );

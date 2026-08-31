@@ -37,6 +37,8 @@ export const LEAD_COLUMNS = [
   "metaDescription",
   "outreachSummary",
   "auditError",
+  "whatsappStatus",
+  "whatsappError",
 ];
 
 // A lead's website column can disagree in small ways between steps
@@ -65,6 +67,54 @@ export function hasRealWebsite(website) {
 // CSV happened to use.
 export function getRowWebsite(row) {
   return row?.website || row?.url || row?.Website || row?.URL || "";
+}
+
+// Reads a phone number off a row regardless of which column name the CSV
+// happened to use — the Google Maps export writes "phone", but a hand-built
+// or third-party CSV might use any of these instead. Checked in order; the
+// first non-empty match wins.
+const PHONE_COLUMN_CANDIDATES = [
+  "phone",
+  "Phone",
+  "phoneNumber",
+  "PhoneNumber",
+  "phone_number",
+  "mobile",
+  "Mobile",
+  "mobileNumber",
+  "contact",
+  "Contact",
+  "contactNumber",
+  "whatsapp",
+  "whatsAppNumber",
+  "whatsapp_number",
+  "tel",
+  "Tel",
+  "telephone",
+];
+
+export function getRowPhone(row) {
+  if (!row) return "";
+  for (const key of PHONE_COLUMN_CANDIDATES) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value).trim();
+    }
+  }
+  return "";
+}
+
+// Which column name on this row actually held the phone number — used to
+// show the user what was detected, e.g. in an upload-summary line.
+export function getRowPhoneColumn(row) {
+  if (!row) return null;
+  for (const key of PHONE_COLUMN_CANDIDATES) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return key;
+    }
+  }
+  return null;
 }
 
 // Parses an uploaded CSV into an array of plain row objects (header row ->
