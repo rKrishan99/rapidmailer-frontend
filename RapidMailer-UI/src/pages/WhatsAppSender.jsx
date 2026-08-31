@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { RiUpload2Line, RiDownloadLine, RiWhatsappLine, RiInformationLine } from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import { parseLeadsCsv, downloadLeadsCsv, getRowPhone, getRowPhoneColumn } from "../utils/leadCsv";
 import ShowWhatsAppResultsTable from "../components/ShowWhatsAppResultsTable";
+import WhatsAppAccountSelect from "../components/WhatsAppAccountSelect";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { Input, Textarea } from "../components/ui/Field";
@@ -16,9 +16,9 @@ import Badge from "../components/ui/Badge";
 const MAX_BATCH = 300;
 
 const WhatsAppSender = () => {
-  const navigate = useNavigate();
-  const { status, sending, results, sendError, sendBulk } = useWhatsApp();
+  const { loading, sending, results, sendError, sendBulk } = useWhatsApp();
 
+  const [accountId, setAccountId] = useState("");
   const [fileName, setFileName] = useState("");
   const [rows, setRows] = useState([]);
   const [skippedCount, setSkippedCount] = useState(0);
@@ -66,6 +66,10 @@ const WhatsAppSender = () => {
   const handleSend = async () => {
     setSubmitError(null);
 
+    if (!accountId) {
+      setSubmitError("Pick which connected WhatsApp account to send from.");
+      return;
+    }
     if (rows.length === 0) {
       setSubmitError("Upload a CSV with a phone number column first.");
       return;
@@ -95,6 +99,7 @@ const WhatsAppSender = () => {
       recipients,
       message,
       settings: {
+        accountId,
         batchSize: Number(batchSize) || 5,
         delayMs: (Number(delaySeconds) || 3) * 1000,
         defaultCountryCode,
@@ -106,11 +111,11 @@ const WhatsAppSender = () => {
     downloadLeadsCsv(results, "whatsapp_send_results.csv");
   };
 
-  if (!status) {
+  if (loading) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="WhatsApp" title="WhatsApp Bulk Sender" />
-        <SectionLoader label="Checking WhatsApp connection..." />
+        <SectionLoader label="Checking connected accounts..." />
       </div>
     );
   }
@@ -123,14 +128,9 @@ const WhatsAppSender = () => {
         description="Upload a lead list (any CSV with a phone-shaped column — Google Maps exports work as-is), then send an approved template message via the official WhatsApp Business API. The result column below IS the number check: WhatsApp's official API has no separate 'has WhatsApp' lookup, so a rejected send (invalid number / not on WhatsApp) is how you find out."
       />
 
-      {!status.connected && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
-          <span>WhatsApp isn't connected yet — connect it once and every WhatsApp tool here can use it.</span>
-          <Button variant="secondary" onClick={() => navigate("/whatsapp-connect")}>
-            Connect WhatsApp
-          </Button>
-        </div>
-      )}
+      <Card className="flex flex-col gap-2 p-6">
+        <WhatsAppAccountSelect value={accountId} onChange={setAccountId} />
+      </Card>
 
       <Card className="flex flex-col gap-4 p-6">
         <div className="flex flex-wrap items-center gap-3">
@@ -301,7 +301,7 @@ const WhatsAppSender = () => {
       {sendError && <p className="text-sm text-rose-400">{sendError}</p>}
 
       <div className="flex justify-end">
-        <Button onClick={handleSend} disabled={sending || rows.length === 0}>
+        <Button onClick={handleSend} disabled={sending || rows.length === 0 || !accountId}>
           {sending ? "Sending..." : `Send to ${Math.min(rows.length, MAX_BATCH) || 0} Recipients`}
         </Button>
       </div>

@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   RiWhatsappLine,
   RiCheckLine,
   RiErrorWarningLine,
   RiInformationLine,
+  RiAddLine,
+  RiDeleteBinLine,
+  RiEditLine,
+  RiRefreshLine,
 } from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import Card from "../components/ui/Card";
@@ -13,6 +17,7 @@ import { Input } from "../components/ui/Field";
 import Badge from "../components/ui/Badge";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
+import EmptyState from "../components/ui/EmptyState";
 
 function Banner({ result }) {
   if (!result) return null;
@@ -30,28 +35,171 @@ function Banner({ result }) {
   );
 }
 
-const WhatsAppConnect = () => {
-  const { status, loading, loadError, saving, testing, saveCredentials, testConnection } = useWhatsApp();
+const emptyDraft = { label: "", accessToken: "", phoneNumberId: "", wabaId: "" };
 
+// One saved account: view mode shows its status + Test/Edit/Delete; edit
+// mode reuses the same field set as the "add new" form below.
+const AccountCard = ({ account, onSaved }) => {
+  const { testConnection, updateAccount, deleteAccount, testing, saving } = useWhatsApp();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({
+    label: account.label,
+    accessToken: "",
+    phoneNumberId: account.phoneNumberId,
+    wabaId: account.wabaId,
+  });
   const [editingToken, setEditingToken] = useState(false);
-  const [tokenDraft, setTokenDraft] = useState("");
-  const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [wabaId, setWabaId] = useState("");
-  const [saveResult, setSaveResult] = useState(null);
-  const [testResult, setTestResult] = useState(null);
+  const [result, setResult] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  useEffect(() => {
-    if (status) {
-      setPhoneNumberId((v) => v || status.phoneNumberId || "");
-      setWabaId((v) => v || status.wabaId || "");
+  const handleTest = async () => {
+    setResult(null);
+    const res = await testConnection({ accountId: account.id });
+    setResult(res);
+  };
+
+  const handleSave = async () => {
+    setResult(null);
+    const payload = { label: draft.label, phoneNumberId: draft.phoneNumberId, wabaId: draft.wabaId };
+    if (editingToken) payload.accessToken = draft.accessToken;
+    const res = await updateAccount(account.id, payload);
+    setResult(res);
+    if (res.ok) {
+      setEditing(false);
+      setEditingToken(false);
+      onSaved?.();
     }
-  }, [status]);
+  };
+
+  const handleDelete = async () => {
+    await deleteAccount(account.id);
+  };
+
+  return (
+    <Card className="flex flex-col gap-4 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
+            <RiWhatsappLine className="text-lg text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">{account.label || "Untitled account"}</h3>
+            <p className="text-sm text-slate-400">
+              {account.verifiedDisplayName
+                ? `"${account.verifiedDisplayName}" · ${account.verifiedPhoneNumber}`
+                : account.phoneNumberId}
+            </p>
+          </div>
+        </div>
+        <Badge tone={account.connected ? "good" : "warn"}>{account.connected ? "Connected" : "Not verified"}</Badge>
+      </div>
+
+      {editing ? (
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Input
+              label="Account Label"
+              value={draft.label}
+              onChange={(e) => setDraft((d) => ({ ...d, label: e.target.value }))}
+            />
+            <Input
+              label="Phone Number ID"
+              value={draft.phoneNumberId}
+              onChange={(e) => setDraft((d) => ({ ...d, phoneNumberId: e.target.value }))}
+            />
+            <Input
+              label="WhatsApp Business Account ID"
+              value={draft.wabaId}
+              onChange={(e) => setDraft((d) => ({ ...d, wabaId: e.target.value }))}
+            />
+          </div>
+          <SecretField
+            label="Access Token"
+            configured={editingToken ? false : true}
+            editing={editingToken}
+            value={draft.accessToken}
+            placeholder="Paste a new token to replace it"
+            onStartEdit={() => setEditingToken(true)}
+            onCancelEdit={() => {
+              setEditingToken(false);
+              setDraft((d) => ({ ...d, accessToken: "" }));
+            }}
+            onChange={(v) => setDraft((d) => ({ ...d, accessToken: v }))}
+            onClear={() => setDraft((d) => ({ ...d, accessToken: "" }))}
+          />
+          <div className="flex gap-3">
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+            <Button variant="secondary" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="secondary" onClick={handleTest} disabled={testing}>
+            <RiRefreshLine />
+            {testing ? "Testing..." : "Test Connection"}
+          </Button>
+          <Button variant="secondary" onClick={() => setEditing(true)}>
+            <RiEditLine />
+            Edit
+          </Button>
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Remove this account?</span>
+              <Button variant="danger" onClick={handleDelete}>
+                Yes, remove
+              </Button>
+              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button variant="ghost" onClick={() => setConfirmDelete(true)}>
+              <RiDeleteBinLine />
+              Remove
+            </Button>
+          )}
+        </div>
+      )}
+
+      <Banner result={result} />
+    </Card>
+  );
+};
+
+const WhatsAppConnect = () => {
+  const { accounts, loading, loadError, saving, testing, addAccount, testConnection } = useWhatsApp();
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [draft, setDraft] = useState(emptyDraft);
+  const [addResult, setAddResult] = useState(null);
+
+  const updateDraft = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+
+  const handleTestDraft = async () => {
+    setAddResult(null);
+    const res = await testConnection(draft);
+    setAddResult(res);
+  };
+
+  const handleAdd = async () => {
+    setAddResult(null);
+    const res = await addAccount(draft);
+    setAddResult(res);
+    if (res.ok) {
+      setDraft(emptyDraft);
+      setShowAddForm(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
-        <PageHeader eyebrow="Connections" title="Connect WhatsApp" />
-        <SectionLoader label="Loading connection status..." />
+        <PageHeader eyebrow="Connections" title="WhatsApp Accounts" />
+        <SectionLoader label="Loading connected accounts..." />
       </div>
     );
   }
@@ -59,128 +207,127 @@ const WhatsAppConnect = () => {
   if (loadError) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
-        <PageHeader eyebrow="Connections" title="Connect WhatsApp" />
+        <PageHeader eyebrow="Connections" title="WhatsApp Accounts" />
         <p className="text-rose-400">{loadError}</p>
       </div>
     );
   }
 
-  const handleTestAndSave = async () => {
-    setSaveResult(null);
-    setTestResult(null);
-
-    const draft = { phoneNumberId, wabaId };
-    if (editingToken) draft.accessToken = tokenDraft;
-
-    const test = await testConnection(draft);
-    setTestResult(test);
-    if (!test.ok) return;
-
-    const save = await saveCredentials(draft);
-    setSaveResult(save);
-    if (save.ok) {
-      setEditingToken(false);
-      setTokenDraft("");
-    }
-  };
-
   return (
     <div className="flex flex-col gap-8 p-6 md:p-10">
       <PageHeader
         eyebrow="Connections · shared by every WhatsApp tool"
-        title="Connect WhatsApp"
-        description="Uses the official WhatsApp Business Cloud API (Meta) — not an unofficial QR-linked client. Connect once here; the WhatsApp Bulk Sender (and any future WhatsApp tool) reuses this same connection."
+        title="WhatsApp Accounts"
+        description="Connect as many WhatsApp Business accounts as you need — one per client or project — using the official WhatsApp Business Cloud API (Meta), not an unofficial QR-linked client. Every WhatsApp tool then lets you pick which connected account to use for that run."
+        actions={
+          !showAddForm && (
+            <Button onClick={() => setShowAddForm(true)}>
+              <RiAddLine />
+              Add Account
+            </Button>
+          )
+        }
       />
 
-      {status?.connected ? (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
-          <RiCheckLine className="text-lg" />
-          <span>
-            Connected{status.verifiedDisplayName ? ` as "${status.verifiedDisplayName}"` : ""}
-            {status.verifiedPhoneNumber ? ` · ${status.verifiedPhoneNumber}` : ""}
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
-          <RiErrorWarningLine className="text-lg" />
-          Not connected yet — fill in the details below.
-        </div>
+      {showAddForm && (
+        <Card className="flex flex-col gap-5 p-6">
+          <div className="flex items-center gap-3">
+            <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
+              <RiWhatsappLine className="text-lg text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white">New WhatsApp Account</h3>
+              <p className="text-sm text-slate-400">From your Meta App's WhatsApp &gt; API Setup page.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Input
+              label="Account Label"
+              placeholder="e.g. Client A - Cafe Chain"
+              value={draft.label}
+              onChange={(e) => updateDraft("label", e.target.value)}
+            />
+            <Input
+              label="Phone Number ID"
+              placeholder="e.g. 123456789012345"
+              value={draft.phoneNumberId}
+              onChange={(e) => updateDraft("phoneNumberId", e.target.value)}
+            />
+            <Input
+              label="WhatsApp Business Account ID (optional)"
+              placeholder="e.g. 987654321000000"
+              value={draft.wabaId}
+              onChange={(e) => updateDraft("wabaId", e.target.value)}
+            />
+            <Input
+              label="Access Token"
+              type="password"
+              placeholder="Permanent access token from Meta Business Manager"
+              value={draft.accessToken}
+              onChange={(e) => updateDraft("accessToken", e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+            <Button variant="secondary" onClick={handleTestDraft} disabled={testing}>
+              {testing ? "Testing..." : "Test Connection"}
+            </Button>
+            <Button onClick={handleAdd} disabled={saving}>
+              {saving ? "Saving..." : "Save Account"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowAddForm(false);
+                setDraft(emptyDraft);
+                setAddResult(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+
+          <Banner result={addResult} />
+        </Card>
       )}
 
-      <Card className="flex flex-col gap-5 p-6">
-        <div className="flex items-center gap-3">
-          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
-            <RiWhatsappLine className="text-lg text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">WhatsApp Business Cloud API</h3>
-            <p className="text-sm text-slate-400">From your Meta App's WhatsApp &gt; API Setup page.</p>
-          </div>
+      {accounts.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          {accounts.map((account) => (
+            <AccountCard key={account.id} account={account} />
+          ))}
         </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Input
-            label="Phone Number ID"
-            placeholder="e.g. 123456789012345"
-            value={phoneNumberId}
-            onChange={(e) => setPhoneNumberId(e.target.value)}
+      ) : (
+        !showAddForm && (
+          <EmptyState
+            icon={RiWhatsappLine}
+            title="No WhatsApp accounts connected yet"
+            description="Add one above — every WhatsApp tool in RapidMailer will then let you pick it."
           />
-          <Input
-            label="WhatsApp Business Account ID (optional)"
-            placeholder="e.g. 987654321000000"
-            value={wabaId}
-            onChange={(e) => setWabaId(e.target.value)}
-          />
-        </div>
-
-        <SecretField
-          label="Access Token"
-          configured={editingToken ? false : status?.accessTokenConfigured}
-          editing={editingToken}
-          value={tokenDraft}
-          placeholder="Permanent access token from Meta Business Manager"
-          onStartEdit={() => setEditingToken(true)}
-          onCancelEdit={() => {
-            setEditingToken(false);
-            setTokenDraft("");
-          }}
-          onChange={setTokenDraft}
-          onClear={() => setTokenDraft("")}
-        />
-
-        <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
-          <Button onClick={handleTestAndSave} disabled={testing || saving}>
-            {testing ? "Testing connection..." : saving ? "Saving..." : "Test & Save Connection"}
-          </Button>
-          <Badge tone="neutral">API version: {status?.apiVersion || "v22.0"}</Badge>
-        </div>
-
-        <Banner result={testResult} />
-        <Banner result={saveResult} />
-      </Card>
+        )
+      )}
 
       <Card className="flex flex-col gap-4 p-6">
         <div className="flex items-center gap-3">
           <RiInformationLine className="text-lg text-violet-300" />
-          <h3 className="font-semibold text-white">How to get these values (one-time setup)</h3>
+          <h3 className="font-semibold text-white">How to get these values (one-time setup, per account)</h3>
         </div>
-        <ol className="flex flex-col gap-2 text-sm text-slate-400 [counter-reset:step] list-none">
+        <ol className="flex flex-col gap-2 text-sm text-slate-400 list-none">
           {[
-            <>Go to <span className="text-slate-200">developers.facebook.com</span> and create a Meta App (type: Business).</>,
+            <>Go to <span className="text-slate-200">developers.facebook.com</span> and create a Meta App (type: Business) — one per client works well, so their data stays separate.</>,
             <>Inside the app, add the <span className="text-slate-200">WhatsApp</span> product.</>,
-            <>Under WhatsApp &gt; API Setup, you'll see a test phone number by default — copy its{" "}
-              <span className="text-slate-200">Phone Number ID</span> and the{" "}
+            <>Under WhatsApp &gt; API Setup, copy the <span className="text-slate-200">Phone Number ID</span> and the{" "}
               <span className="text-slate-200">WhatsApp Business Account ID</span> shown there.</>,
             <>Generate a <span className="text-slate-200">permanent access token</span>: Meta Business Suite &gt; Business Settings &gt; System Users &gt; create a system user, assign it your WhatsApp app, and generate a token with{" "}
               <code className="text-slate-300">whatsapp_business_messaging</code> permission.</>,
-            <>Paste the Phone Number ID, WABA ID and token above and click "Test &amp; Save Connection".</>,
+            <>Paste everything into "Add Account" above and click "Test Connection", then "Save Account".</>,
             <><span className="text-slate-200">Before sending to real leads</span>: submit at least one message{" "}
               <span className="text-slate-200">template</span> for approval under WhatsApp &gt; Message Templates —
               Meta requires an approved template for any message you send first (i.e. cold outreach). This can take
               a few hours to a day to get approved.</>,
-            <>To message real customers (not just the test numbers Meta gives you during setup), you'll also need to
-              complete <span className="text-slate-200">Meta Business verification</span> for your Business Manager
-              account.</>,
+            <>To message real customers (not just Meta's test numbers), you'll also need{" "}
+              <span className="text-slate-200">Meta Business verification</span> for that Business Manager account.</>,
           ].map((text, i) => (
             <li key={i} className="flex gap-3">
               <span className="grad-ring flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white">

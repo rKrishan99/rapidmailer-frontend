@@ -8,6 +8,7 @@ import {
   RiShieldCheckLine,
   RiShareForwardLine,
   RiWhatsappLine,
+  RiFilterLine,
 } from "react-icons/ri";
 
 export const toolInfo = [
@@ -58,6 +59,12 @@ export const toolInfo = [
     title: "Bulk Website Audit",
     description: "Check performance, security and SEO basics, then filter out dead leads.",
     path: "/website-audit",
+  },
+  {
+    icon: RiFilterLine,
+    title: "WhatsApp Number Filter (from CSV)",
+    description: "Split a lead list into on-WhatsApp / not-on-WhatsApp before you run a campaign.",
+    path: "/whatsapp-filter",
   },
   {
     icon: RiWhatsappLine,

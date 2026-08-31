@@ -13,6 +13,7 @@ import {
   RiShieldCheckLine,
   RiWhatsappLine,
   RiLinksLine,
+  RiFilterLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiSettings4Line,
@@ -29,35 +30,10 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Lead Generation",
+    label: "Accounts",
     items: [
-      { title: "Google Maps", path: "/gmap-data", icon: RiMapPin2Line },
-      { title: "Web Search", path: "/web-data", icon: RiGlobalLine },
-      { title: "Email Finder", path: "/email-finder", icon: RiSearchLine },
-      { title: "Social Enricher", path: "/social-enricher", icon: RiShareForwardLine },
-    ],
-  },
-  {
-    label: "Email",
-    items: [
-      { title: "Verify Emails", path: "/verify-mails", icon: RiMailCheckLine },
-      { title: "Send Campaign", path: "/send-mails", icon: RiSendPlaneLine },
-    ],
-  },
-  {
-    label: "Website Intel",
-    items: [
-      { title: "Tech Detector", path: "/tech-detector", icon: RiCodeSSlashLine },
-      { title: "Website Audit", path: "/website-audit", icon: RiShieldCheckLine },
-    ],
-  },
-  {
-    label: "WhatsApp",
-    items: [
-      // One shared connection powers every WhatsApp tool below it — connect
-      // once here rather than per tool.
-      { title: "Connect WhatsApp", path: "/whatsapp-connect", icon: RiLinksLine },
-      { title: "Bulk Sender", path: "/whatsapp-sender", icon: RiWhatsappLine },
+      { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiLinksLine },
+      { title: "Email Accounts", path: "/email-accounts", icon: RiMailCheckLine },
     ],
   },
 ];

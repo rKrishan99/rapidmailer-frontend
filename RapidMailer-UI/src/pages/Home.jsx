@@ -14,6 +14,7 @@ import TechDetector from "./TechDetector";
 import WebsiteAudit from "./WebsiteAudit";
 import WhatsAppConnect from "./WhatsAppConnect";
 import WhatsAppSender from "./WhatsAppSender";
+import WhatsAppNumberFilter from "./WhatsAppNumberFilter";
 import Settings from "./Settings";
 
 const Home = () => (
@@ -33,6 +34,7 @@ const Home = () => (
     <Route path="/tech-detector" element={<TechDetector />} />
     <Route path="/website-audit" element={<WebsiteAudit />} />
     <Route path="/whatsapp-connect" element={<WhatsAppConnect />} />
+    <Route path="/whatsapp-filter" element={<WhatsAppNumberFilter />} />
     <Route path="/whatsapp-sender" element={<WhatsAppSender />} />
     <Route path="/settings" element={<Settings />} />
   </Routes>
