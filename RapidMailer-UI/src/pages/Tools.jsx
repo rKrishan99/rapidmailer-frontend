@@ -1,17 +1,15 @@
-import React from 'react'
-import ToolCards from '../components/ToolCards';
+import ToolCards from "../components/ToolCards";
+import PageHeader from "../components/ui/PageHeader";
 
-const Tools = () => {
-  return (
-    <div className=' flex flex-col gap-6 p-8'>
-      <div className=''>
-        <h1 className='text-2xl font-bold'>Tools</h1>
-      </div>
-      <div>
-        <ToolCards/>
-      </div>
-    </div>
-  )
-}
+const Tools = () => (
+  <div className="flex flex-col gap-8 p-6 md:p-10">
+    <PageHeader
+      eyebrow="Toolkit"
+      title="All Tools"
+      description="Everything you need to find, verify and reach leads — pick a tool to get started."
+    />
+    <ToolCards />
+  </div>
+);
 
 export default Tools;

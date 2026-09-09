@@ -1,11 +1,9 @@
 import logo from './logo.png';
-import burgerIcon from './burgerIcon.svg';
+import bannerImg from './bannerImg.png'
 import dashboard from './dashboard.svg';
-
 
 export const images = {
     logo,
-    burgerIcon,
+    bannerImg,
     dashboard
 }
-    

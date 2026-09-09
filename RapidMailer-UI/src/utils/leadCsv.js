@@ -1,0 +1,180 @@
+// src/utils/leadCsv.js
+//
+// Shared CSV "lead record" plumbing used across the whole RapidMailer
+// pipeline: Google Maps -> Email Finder -> Tech Detector -> Website Audit
+// -> Send Emails. Every tool downstream of Google Maps reads the same CSV
+// shape and only writes the columns it's responsible for, so a lead's
+// name/address/phone/etc. survive the whole trip untouched.
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
+
+// Canonical columns the pipeline tools read/write. This isn't enforced
+// anywhere (a CSV can have extra columns and they pass straight through) —
+// it's just the shared vocabulary so every tool agrees on a field's name.
+export const LEAD_COLUMNS = [
+  "name",
+  "website",
+  "address",
+  "phone",
+  "category",
+  "rating",
+  "reviews",
+  "email",
+  "facebookUrl",
+  "instagramUrl",
+  "extractedEmail",
+  "extractedPhone",
+  "technology",
+  "wordpressTheme",
+  "performanceScore",
+  "sslValid",
+  "missingSecurityHeaders",
+  "exposedFiles",
+  "wordpressVersion",
+  "wordpressOutdated",
+  "hasSitemapXml",
+  "hasRobotsTxt",
+  "metaDescription",
+  "outreachSummary",
+  "auditError",
+  "whatsappStatus",
+  "whatsappError",
+];
+
+// A lead's website column can disagree in small ways between steps
+// ("https://foo.com", "foo.com/", "www.foo.com") — normalize down to a
+// bare-domain key so the same site still matches when merging results back.
+export function normalizeWebsiteKey(url) {
+  if (!url) return "";
+  return url
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+}
+
+// True when a lead actually has a website — false for empty/missing values
+// and for the literal "No Website" the Google Maps scraper writes.
+export function hasRealWebsite(website) {
+  if (!website) return false;
+  const v = website.toString().trim().toLowerCase();
+  return v !== "" && v !== "no website" && v !== "n/a";
+}
+
+// Reads a website/url value off a row regardless of which column name the
+// CSV happened to use.
+export function getRowWebsite(row) {
+  return row?.website || row?.url || row?.Website || row?.URL || "";
+}
+
+// Reads a phone number off a row regardless of which column name the CSV
+// happened to use — the Google Maps export writes "phone", but a hand-built
+// or third-party CSV might use any of these instead. Checked in order; the
+// first non-empty match wins.
+const PHONE_COLUMN_CANDIDATES = [
+  "phone",
+  "Phone",
+  "phoneNumber",
+  "PhoneNumber",
+  "phone_number",
+  "mobile",
+  "Mobile",
+  "mobileNumber",
+  "contact",
+  "Contact",
+  "contactNumber",
+  "whatsapp",
+  "whatsAppNumber",
+  "whatsapp_number",
+  "tel",
+  "Tel",
+  "telephone",
+];
+
+export function getRowPhone(row) {
+  if (!row) return "";
+  for (const key of PHONE_COLUMN_CANDIDATES) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value).trim();
+    }
+  }
+  return "";
+}
+
+// Which column name on this row actually held the phone number — used to
+// show the user what was detected, e.g. in an upload-summary line.
+export function getRowPhoneColumn(row) {
+  if (!row) return null;
+  for (const key of PHONE_COLUMN_CANDIDATES) {
+    const value = row[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return key;
+    }
+  }
+  return null;
+}
+
+// Parses an uploaded CSV into an array of plain row objects (header row ->
+// keys). Keeps every column the file has, not just LEAD_COLUMNS, so a tool
+// never silently drops data it doesn't recognize.
+//
+// Runs in a Web Worker (worker: true) so a large file (thousands of rows —
+// easy to hit chaining Google Maps -> Email Finder exports) doesn't freeze
+// the UI thread while parsing. Note: PapaParse's worker mode can't carry
+// function-valued options like `transformHeader` across to the worker (only
+// `step`/`chunk`/`complete`/`error` are proxied), so header trimming is done
+// as a post-processing pass here instead — same end result, worker-safe.
+export function parseLeadsCsv(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      worker: true,
+      complete: (result) => {
+        const rows = (result.data || []).map((row) => {
+          const trimmed = {};
+          for (const key of Object.keys(row)) {
+            trimmed[key.trim()] = row[key];
+          }
+          return trimmed;
+        });
+        resolve(rows);
+      },
+      error: reject,
+    });
+  });
+}
+
+// Merges enrichment results (each carrying a website/url field) back onto
+// the original full lead rows, matched by normalized website. A tool only
+// needs to hand back {website/url, ...the new fields it found} — the rest of
+// the row (name, phone, address, whatever came before) is preserved as-is.
+// Rows with no match are returned unchanged.
+export function mergeByWebsite(baseRows, updates, { baseKey = "website", updateKey = "url" } = {}) {
+  const updateMap = new Map();
+  (updates || []).forEach((u) => {
+    const key = normalizeWebsiteKey(u[updateKey] ?? u[baseKey] ?? getRowWebsite(u));
+    if (key) updateMap.set(key, u);
+  });
+
+  return (baseRows || []).map((row) => {
+    const key = normalizeWebsiteKey(getRowWebsite(row));
+    const update = key ? updateMap.get(key) : null;
+    if (!update) return row;
+    // Never let the update's key column clobber the row's own website value.
+    const { [updateKey]: _ignoredUrl, ...rest } = update;
+    return { ...row, ...rest };
+  });
+}
+
+// Exports rows as a downloaded CSV file, using Papa.unparse so commas/quotes
+// in real data (business names, addresses) are escaped properly.
+export function downloadLeadsCsv(rows, filename = "leads.csv") {
+  if (!rows || rows.length === 0) return;
+  const csv = Papa.unparse(rows);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  saveAs(blob, filename);
+}
