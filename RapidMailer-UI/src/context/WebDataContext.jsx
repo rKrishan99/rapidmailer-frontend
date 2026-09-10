@@ -1,42 +1,53 @@
-import { createContext, useState } from "react";
-import axios from 'axios';
-import { API_BASE_URL } from '../constants/api';
-
+import { createContext, useState, useCallback } from "react";
+import axios from "axios";
+import { API_BASE_URL } from "../constants/api";
 
 export const WebDataContext = createContext();
 
+export function WebDataProvider({ children }) {
+  const [results, setResults] = useState([]); // [{ url, emails, error? }]
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-export function WebDataProvider({children}){
+  /**
+   * Send a list of URLs to the backend, scrape each for emails, and store
+   * the per-URL results.
+   *
+   * @param {string[]} urls
+   */
+  const extractEmailsFromUrls = useCallback(async (urls) => {
+    setLoading(true);
+    setError(null);
+    setResults([]);
 
-    const [webData, setWebData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/extract-emails-from-urls`,
+        { urls },
+        { timeout: 5 * 60 * 1000 } // up to 5 min for large lists
+      );
+      setResults(response.data?.results ?? []);
+    } catch (err) {
+      const message =
+        err.response?.data?.error ||
+        err.message ||
+        "An error occurred while extracting emails.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const fetchWebData = async(keyword, location) => {
-        setLoading(true);
-        try{
-            const response = await axios.post(`${API_BASE_URL}/extract-emails`, { keyword, location });
-            setWebData(response.data);
-        }catch(err){
-            setError(err.response?.data?.error || err.message || "An error occurred while fetching google web data.");
-        }finally{
-            setLoading(false);
-        }
-    };
+  const value = {
+    results,
+    setResults,
+    loading,
+    error,
+    setError,
+    extractEmailsFromUrls,
+  };
 
-    const value = {
-        webData,
-        setWebData,
-        loading,
-        setLoading,
-        fetchWebData,
-        error,
-        setError,
-    };
-
-    return(
-        <WebDataContext.Provider value={value}>
-            {children}
-        </WebDataContext.Provider>
-    );
-} 
+  return (
+    <WebDataContext.Provider value={value}>{children}</WebDataContext.Provider>
+  );
+}
