@@ -8,6 +8,63 @@
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
 
+// ---------------------------------------------------------------------------
+// Client-side email cell sanitizer
+// Mirrors the backend emailSanitizer.js so the column-selector preview count
+// is accurate without a server round-trip.
+// ---------------------------------------------------------------------------
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const BLOCKED_EXT = /\.(gif|png|jpg|jpeg|webp|svg|bmp|ico|pdf|zip|mp4|mov)$/i;
+const BLOCKED_DOMAINS = [
+  "example.com", "example.org", "example.net",
+  "sentry.io", "sentry-next.io",
+  "noreply.", "no-reply.", "donotreply.",
+  "mailer-daemon.", "postmaster.", "bounce.", "bounces.",
+  "localhost",
+];
+const TRAILING_ARTIFACTS = /[\s,;]+(?:website|location|map|page|url|link|http|www|contact|info|home|blog|shop|store|office)[\w:/.-]*/gi;
+
+function isBlockedToken(token) {
+  if (BLOCKED_EXT.test(token)) return true;
+  for (const d of BLOCKED_DOMAINS) {
+    if (token.includes(d)) return true;
+  }
+  return false;
+}
+
+/**
+ * Extracts the best valid email from a single CSV cell value.
+ * Returns a clean lowercase email string, or null if nothing valid is found.
+ *
+ * Pipeline: URL-decode → strip trailing artifact words → split delimiters →
+ *           block-list → RFC format check.
+ *
+ * @param {string|null|undefined} raw
+ * @returns {string|null}
+ */
+export function sanitizeEmailCell(raw) {
+  if (raw === null || raw === undefined) return null;
+  let cell = String(raw).trim();
+  if (!cell) return null;
+
+  try { cell = decodeURIComponent(cell); } catch { /* keep raw */ }
+  cell = cell.replace(TRAILING_ARTIFACTS, "").trim();
+
+  const tokens = cell
+    .split(/[;,|\s\n\r]+/)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+
+  for (const token of tokens) {
+    if (!token.includes("@")) continue;
+    if (isBlockedToken(token)) continue;
+    if (EMAIL_RE.test(token)) return token;
+  }
+  return null;
+}
+
 // Canonical columns the pipeline tools read/write. This isn't enforced
 // anywhere (a CSV can have extra columns and they pass straight through) —
 // it's just the shared vocabulary so every tool agrees on a field's name.

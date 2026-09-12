@@ -1,24 +1,35 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useContext } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../constants/api";
 
 export const EmailsSendContext = createContext();
 
 export function EmailsSendProvider({ children }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [response, setResponse] = useState(null);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState(null);
+  // Full delivery report payload: { stats, results, skippedRows, testMode }
+  const [campaignData, setCampaignData] = useState(null);
 
-  // Takes the full request body ({emailTemplate, emails} for a blast, or
-  // {emailTemplate, mode: "personalized", records} for a mail-merge send)
-  // and posts it straight through to the backend.
-  const SendEmails = async (payload) => {
+  /**
+   * Send a campaign (or a test email).
+   *
+   * Payload shape (blast):
+   *   { emailTemplate, emails, accountId, testMode?, testEmail? }
+   *
+   * Payload shape (personalized):
+   *   { emailTemplate, mode: "personalized", records, accountId, testMode?, testEmail? }
+   *
+   * Returns the full API response object so callers can read stats immediately.
+   */
+  const sendCampaign = async (payload) => {
     setLoading(true);
     setError(null);
+    setCampaignData(null);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/send-emails`, payload);
-      return response.data;
+      const res = await axios.post(`${API_BASE_URL}/send-emails`, payload);
+      setCampaignData(res.data);
+      return res.data;
     } catch (err) {
       setError(err.response?.data?.error || err.message);
       throw err;
@@ -32,9 +43,9 @@ export function EmailsSendProvider({ children }) {
     setLoading,
     error,
     setError,
-    response,
-    SendEmails,
-    setResponse,
+    campaignData,
+    setCampaignData,
+    sendCampaign,
   };
 
   return (
@@ -42,4 +53,11 @@ export function EmailsSendProvider({ children }) {
       {children}
     </EmailsSendContext.Provider>
   );
+}
+
+/** Convenience hook — throws when used outside the provider. */
+export function useEmailSend() {
+  const ctx = useContext(EmailsSendContext);
+  if (!ctx) throw new Error("useEmailSend must be used inside EmailsSendProvider");
+  return ctx;
 }
