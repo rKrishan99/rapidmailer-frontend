@@ -7,6 +7,7 @@ import Toggle from "../components/ui/Toggle";
 import SecretField from "../components/ui/SecretField";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
+import { APP_NAME } from "../constants/branding";
 
 function Banner({ result }) {
   if (!result) return null;
@@ -79,7 +80,7 @@ const Settings = () => {
       <PageHeader
         eyebrow="System"
         title="Settings"
-        description="Configure how RapidMailer scrapes the web and which integrations it uses. Sender accounts live under Email Accounts, and WhatsApp connections under Connect WhatsApp."
+        description={`Configure how ${APP_NAME} scrapes the web and which integrations it uses. Sender accounts live under Email Accounts, and WhatsApp connections under WhatsApp Accounts.`}
         actions={
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}

@@ -19,6 +19,7 @@ import Badge from "../components/ui/Badge";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
+import { APP_NAME } from "../constants/branding";
 
 function Banner({ result }) {
   if (!result) return null;
@@ -91,7 +92,7 @@ const AccountFields = ({ draft, onChange }) => (
       />
       <Input
         label="From Name"
-        placeholder="RapidMailer"
+        placeholder={APP_NAME}
         value={draft.fromName}
         onChange={(e) => onChange("fromName", e.target.value)}
       />

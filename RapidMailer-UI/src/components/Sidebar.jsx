@@ -20,6 +20,7 @@ import {
 } from "react-icons/ri";
 import { images } from "../assets/assets";
 import { SidebarExpandContext } from "../context/SidebarExpandContext";
+import { APP_NAME } from "../constants/branding";
 
 const NAV_GROUPS = [
   {
@@ -73,7 +74,7 @@ const Sidebar = () => {
         <img
           className={`${isExpand ? "w-[150px]" : "w-0"} overflow-hidden transition-all duration-300`}
           src={images.logo}
-          alt="RapidMailer"
+          alt={APP_NAME}
         />
         <button
           type="button"

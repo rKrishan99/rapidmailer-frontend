@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { images } from "../assets/assets";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
+import { APP_NAME } from "../constants/branding";
 
 const FEATURES = [
   {
@@ -40,15 +41,15 @@ const Dashboard = () => {
           <div className="flex flex-1 flex-col gap-6">
             <TypeAnimation
               sequence={[
-                "RapidMailer",
+                APP_NAME,
                 1000,
-                "RapidMailer — Lead Generation",
+                `${APP_NAME} — Lead Generation`,
                 1000,
-                "RapidMailer — Email Marketing",
+                `${APP_NAME} — Email Marketing`,
                 1000,
-                "RapidMailer — Your All-in-One Solution",
+                `${APP_NAME} — Your All-in-One Solution`,
                 1000,
-                "RapidMailer — Your All-in-One Lead Generation & Email Marketing Solution",
+                `${APP_NAME} — Your All-in-One Lead Generation & Outreach Solution`,
                 3000,
               ]}
               wrapper="h1"

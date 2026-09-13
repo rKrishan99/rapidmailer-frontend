@@ -1,74 +1,190 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import {
   RiWhatsappLine,
   RiCheckLine,
   RiErrorWarningLine,
-  RiInformationLine,
   RiAddLine,
   RiDeleteBinLine,
   RiEditLine,
+  RiQrCodeLine,
+  RiShutDownLine,
   RiRefreshLine,
+  RiShieldCheckLine,
 } from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import SecretField from "../components/ui/SecretField";
 import { Input } from "../components/ui/Field";
 import Badge from "../components/ui/Badge";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
+import { API_BASE_URL } from "../constants/api";
+import { APP_NAME } from "../constants/branding";
 
-function Banner({ result }) {
-  if (!result) return null;
-  return (
-    <div
-      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm ${
-        result.ok
-          ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-          : "border-rose-400/30 bg-rose-400/10 text-rose-300"
-      }`}
-    >
-      {result.ok ? <RiCheckLine /> : <RiErrorWarningLine />}
-      {result.message}
-    </div>
-  );
+function StatusBadge({ status, phone }) {
+  switch (status) {
+    case "connected":
+      return <Badge tone="good">Connected {phone ? `(+${phone})` : ""}</Badge>;
+    case "qr_ready":
+      return <Badge tone="brand">QR Code Ready</Badge>;
+    case "connecting":
+      return <Badge tone="neutral">Connecting...</Badge>;
+    case "disconnected":
+    default:
+      return <Badge tone="bad">Disconnected</Badge>;
+  }
 }
 
-const emptyDraft = { label: "", accessToken: "", phoneNumberId: "", wabaId: "" };
+// Modal / Overlay QR Code Scanner
+const QrModal = ({ account, onClose, onConnected }) => {
+  const [qrCode, setQrCode] = useState(null);
+  const [status, setStatus] = useState("connecting");
+  const [error, setError] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(false);
 
-// One saved account: view mode shows its status + Test/Edit/Delete; edit
-// mode reuses the same field set as the "add new" form below.
-const AccountCard = ({ account, onSaved }) => {
-  const { testConnection, updateAccount, deleteAccount, testing, saving } = useWhatsApp();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState({
-    label: account.label,
-    accessToken: "",
-    phoneNumberId: account.phoneNumberId,
-    wabaId: account.wabaId,
-  });
-  const [editingToken, setEditingToken] = useState(false);
-  const [result, setResult] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const handleTest = async () => {
-    setResult(null);
-    const res = await testConnection({ accountId: account.id });
-    setResult(res);
+  const startSession = async () => {
+    setIsInitializing(true);
+    setError(null);
+    try {
+      const res = await axios.post(`${API_BASE_URL}/whatsapp/session/${account.id}/init`);
+      if (res.data?.qr) setQrCode(res.data.qr);
+      if (res.data?.status) setStatus(res.data.status);
+    } catch (err) {
+      console.error("Session init error:", err);
+      setError(err.response?.data?.error || err.message || "Failed to initialize session");
+    } finally {
+      setIsInitializing(false);
+    }
   };
 
-  const handleSave = async () => {
-    setResult(null);
-    const payload = { label: draft.label, phoneNumberId: draft.phoneNumberId, wabaId: draft.wabaId };
-    if (editingToken) payload.accessToken = draft.accessToken;
-    const res = await updateAccount(account.id, payload);
-    setResult(res);
-    if (res.ok) {
-      setEditing(false);
-      setEditingToken(false);
-      onSaved?.();
+  const pollStatus = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/whatsapp/session/${account.id}/status`);
+      if (res.data) {
+        if (res.data.qr) {
+          setQrCode(res.data.qr);
+        }
+        if (res.data.status) {
+          setStatus(res.data.status);
+        }
+        if (res.data.status === "connected") {
+          onConnected?.();
+          setTimeout(() => {
+            onClose();
+          }, 1200);
+        }
+      }
+    } catch (err) {
+      // Quietly retry on next interval
     }
+  };
+
+  useEffect(() => {
+    startSession();
+    const interval = setInterval(pollStatus, 1500);
+    return () => clearInterval(interval);
+  }, [account.id]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <Card className="flex w-full max-w-lg flex-col gap-6 p-8 border border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
+              <RiWhatsappLine className="text-xl text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white">Link WhatsApp Account</h3>
+              <p className="text-xs text-slate-400">{account.label}</p>
+            </div>
+          </div>
+          <StatusBadge status={status} />
+        </div>
+
+        {status === "connected" ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-400">
+              <RiCheckLine className="text-3xl" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">Connected Successfully!</h4>
+            <p className="text-sm text-slate-400">Your device is linked and ready for messaging & filtering.</p>
+          </div>
+        ) : qrCode && status !== "disconnected" ? (
+          <div className="flex flex-col items-center gap-5">
+            <div className="rounded-2xl border-2 border-emerald-500/30 bg-white p-4 shadow-xl">
+              <img src={qrCode} alt="WhatsApp QR Code" className="h-64 w-64 object-contain" />
+            </div>
+            <div className="flex flex-col gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/20 text-violet-300 font-bold">1</span>
+                <span>Open WhatsApp on your phone</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/20 text-violet-300 font-bold">2</span>
+                <span>Tap <strong>Menu</strong> (Android) or <strong>Settings</strong> (iPhone)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/20 text-violet-300 font-bold">3</span>
+                <span>Tap <strong>Linked Devices</strong> &gt; <strong>Link a Device</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/20 text-violet-300 font-bold">4</span>
+                <span>Point your phone at this QR code</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+            {isInitializing ? (
+              <SectionLoader label="Generating WhatsApp QR code..." />
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-slate-300">
+                  {error || "QR code expired or connection closed. Click below to generate a new QR code."}
+                </p>
+                <Button onClick={startSession} variant="secondary">
+                  <RiRefreshLine />
+                  Generate New QR Code
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+// Account Card Component
+const AccountCard = ({ account, onOpenQr, onRefresh }) => {
+  const { updateAccount, deleteAccount, logoutSession, saving } = useWhatsApp();
+  const [editing, setEditing] = useState(false);
+  const [label, setLabel] = useState(account.label);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const isConnected = account.connected || account.liveStatus === "connected";
+  const displayPhone = account.verifiedPhoneNumber || account.activeUser?.phone;
+  const displayName = account.verifiedDisplayName || account.activeUser?.name;
+
+  const handleSaveLabel = async () => {
+    await updateAccount(account.id, { label });
+    setEditing(false);
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logoutSession(account.id);
+    setLoggingOut(false);
+    onRefresh?.();
   };
 
   const handleDelete = async () => {
@@ -79,78 +195,64 @@ const AccountCard = ({ account, onSaved }) => {
     <Card className="flex flex-col gap-4 p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
-            <RiWhatsappLine className="text-lg text-white" />
+          <div className="grad-ring flex h-11 w-11 items-center justify-center rounded-xl">
+            <RiWhatsappLine className="text-xl text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-white">{account.label || "Untitled account"}</h3>
+            <h3 className="font-semibold text-white">{account.label || "Untitled WhatsApp Account"}</h3>
             <p className="text-sm text-slate-400">
-              {account.verifiedDisplayName
-                ? `"${account.verifiedDisplayName}"${account.verifiedPhoneNumber ? ` · ${account.verifiedPhoneNumber}` : ""}`
-                : account.phoneNumberId}
+              {isConnected && displayPhone
+                ? `${displayName ? `"${displayName}" · ` : ""}+${displayPhone}`
+                : "No phone linked yet — scan QR code"}
             </p>
           </div>
         </div>
-        <Badge tone={account.connected ? "good" : "warn"}>{account.connected ? "Connected" : "Not verified"}</Badge>
+        <StatusBadge status={account.liveStatus || (account.connected ? "connected" : "disconnected")} phone={displayPhone} />
       </div>
 
       {editing ? (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Input
-              label="Account Label"
-              value={draft.label}
-              onChange={(e) => setDraft((d) => ({ ...d, label: e.target.value }))}
-            />
-            <Input
-              label="Phone Number ID"
-              value={draft.phoneNumberId}
-              onChange={(e) => setDraft((d) => ({ ...d, phoneNumberId: e.target.value }))}
-            />
-            <Input
-              label="WhatsApp Business Account ID"
-              value={draft.wabaId}
-              onChange={(e) => setDraft((d) => ({ ...d, wabaId: e.target.value }))}
-            />
-          </div>
-          <SecretField
-            label="Access Token"
-            configured={editingToken ? false : true}
-            editing={editingToken}
-            value={draft.accessToken}
-            placeholder="Paste a new token to replace it"
-            onStartEdit={() => setEditingToken(true)}
-            onCancelEdit={() => {
-              setEditingToken(false);
-              setDraft((d) => ({ ...d, accessToken: "" }));
-            }}
-            onChange={(v) => setDraft((d) => ({ ...d, accessToken: v }))}
-            onClear={() => setDraft((d) => ({ ...d, accessToken: "" }))}
+        <div className="flex items-center gap-3">
+          <Input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Account Label (e.g. Sales WhatsApp)"
           />
-          <div className="flex gap-3">
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save"}
-            </Button>
-            <Button variant="secondary" onClick={() => setEditing(false)}>
-              Cancel
-            </Button>
-          </div>
+          <Button onClick={handleSaveLabel} disabled={saving}>
+            Save
+          </Button>
+          <Button variant="secondary" onClick={() => setEditing(false)}>
+            Cancel
+          </Button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="secondary" onClick={handleTest} disabled={testing}>
-            <RiRefreshLine />
-            {testing ? "Testing..." : "Test Connection"}
-          </Button>
+        <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-white/10">
+          {!isConnected ? (
+            <Button onClick={() => onOpenQr(account)}>
+              <RiQrCodeLine />
+              Scan QR Code to Connect
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="text-rose-300 hover:bg-rose-500/10 border-rose-500/20"
+            >
+              <RiShutDownLine />
+              {loggingOut ? "Disconnecting..." : "Disconnect"}
+            </Button>
+          )}
+
           <Button variant="secondary" onClick={() => setEditing(true)}>
             <RiEditLine />
-            Edit
+            Rename
           </Button>
+
           {confirmDelete ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Remove this account?</span>
+              <span className="text-xs text-slate-400">Delete account?</span>
               <Button variant="danger" onClick={handleDelete}>
-                Yes, remove
+                Yes, Delete
               </Button>
               <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
                 Cancel
@@ -164,34 +266,25 @@ const AccountCard = ({ account, onSaved }) => {
           )}
         </div>
       )}
-
-      <Banner result={result} />
     </Card>
   );
 };
 
 const WhatsAppConnect = () => {
-  const { accounts, loading, loadError, saving, testing, addAccount, testConnection } = useWhatsApp();
+  const { accounts, loading, loadError, saving, addAccount, refreshAccounts } = useWhatsApp();
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [draft, setDraft] = useState(emptyDraft);
-  const [addResult, setAddResult] = useState(null);
-
-  const updateDraft = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
-
-  const handleTestDraft = async () => {
-    setAddResult(null);
-    const res = await testConnection(draft);
-    setAddResult(res);
-  };
+  const [newLabel, setNewLabel] = useState("");
+  const [activeQrAccount, setActiveQrAccount] = useState(null);
 
   const handleAdd = async () => {
-    setAddResult(null);
-    const res = await addAccount(draft);
-    setAddResult(res);
-    if (res.ok) {
-      setDraft(emptyDraft);
+    if (!newLabel.trim()) return;
+    const res = await addAccount({ label: newLabel.trim() });
+    if (res.ok && res.account) {
+      setNewLabel("");
       setShowAddForm(false);
+      // Immediately trigger QR modal for the newly added account
+      setActiveQrAccount(res.account);
     }
   };
 
@@ -199,16 +292,7 @@ const WhatsAppConnect = () => {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="Connections" title="WhatsApp Accounts" />
-        <SectionLoader label="Loading connected accounts..." />
-      </div>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <div className="flex flex-col gap-8 p-6 md:p-10">
-        <PageHeader eyebrow="Connections" title="WhatsApp Accounts" />
-        <p className="text-rose-400">{loadError}</p>
+        <SectionLoader label="Checking connected WhatsApp accounts..." />
       </div>
     );
   }
@@ -216,86 +300,88 @@ const WhatsAppConnect = () => {
   return (
     <div className="flex flex-col gap-8 p-6 md:p-10">
       <PageHeader
-        eyebrow="Connections · shared by every WhatsApp tool"
+        eyebrow="Linked Devices · QR Authentication"
         title="WhatsApp Accounts"
-        description="Connect as many WhatsApp Business accounts as you need — one per client or project — using the official WhatsApp Business Cloud API (Meta), not an unofficial QR-linked client. Every WhatsApp tool then lets you pick which connected account to use for that run."
+        description="Connect your WhatsApp accounts effortlessly using QR code scanning — no Meta Cloud API, no Facebook Business verification, and no template approval delays required. Connect personal or business WhatsApp numbers just like WhatsApp Web."
         actions={
           !showAddForm && (
-            <Button onClick={() => setShowAddForm(true)}>
-              <RiAddLine />
-              Add Account
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={refreshAccounts}>
+                <RiRefreshLine />
+                Refresh
+              </Button>
+              <Button onClick={() => setShowAddForm(true)}>
+                <RiAddLine />
+                Add WhatsApp Account
+              </Button>
+            </div>
           )
         }
       />
 
       {showAddForm && (
-        <Card className="flex flex-col gap-5 p-6">
+        <Card className="flex flex-col gap-4 p-6 border border-violet-500/30">
           <div className="flex items-center gap-3">
             <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
-              <RiWhatsappLine className="text-lg text-white" />
+              <RiWhatsappLine className="text-xl text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">New WhatsApp Account</h3>
-              <p className="text-sm text-slate-400">From your Meta App's WhatsApp &gt; API Setup page.</p>
+              <h3 className="font-semibold text-white">Add New WhatsApp Account</h3>
+              <p className="text-xs text-slate-400">
+                Give your account a friendly name (e.g. "Main Sales Line" or "Personal Support").
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Input
-              label="Account Label"
-              placeholder="e.g. Client A - Cafe Chain"
-              value={draft.label}
-              onChange={(e) => updateDraft("label", e.target.value)}
-            />
-            <Input
-              label="Phone Number ID"
-              placeholder="e.g. 123456789012345"
-              value={draft.phoneNumberId}
-              onChange={(e) => updateDraft("phoneNumberId", e.target.value)}
-            />
-            <Input
-              label="WhatsApp Business Account ID (optional)"
-              placeholder="e.g. 987654321000000"
-              value={draft.wabaId}
-              onChange={(e) => updateDraft("wabaId", e.target.value)}
-            />
-            <Input
-              label="Access Token"
-              type="password"
-              placeholder="Permanent access token from Meta Business Manager"
-              value={draft.accessToken}
-              onChange={(e) => updateDraft("accessToken", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
-            <Button variant="secondary" onClick={handleTestDraft} disabled={testing}>
-              {testing ? "Testing..." : "Test Connection"}
-            </Button>
-            <Button onClick={handleAdd} disabled={saving}>
-              {saving ? "Saving..." : "Save Account"}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setShowAddForm(false);
-                setDraft(emptyDraft);
-                setAddResult(null);
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-
-          <Banner result={addResult} />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAdd();
+            }}
+            className="flex flex-col sm:flex-row sm:items-end gap-3"
+          >
+            <div className="flex-1">
+              <Input
+                label="Account Label"
+                placeholder="e.g. Sales Outreach #1"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="flex items-center gap-2 pb-[1px]">
+              <Button
+                type="submit"
+                disabled={saving || !newLabel.trim()}
+                className="whitespace-nowrap h-[42px]"
+              >
+                {saving ? "Creating..." : "Create & Scan QR"}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setNewLabel("");
+                }}
+                className="h-[42px]"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
         </Card>
       )}
 
       {accounts.length > 0 ? (
         <div className="flex flex-col gap-4">
           {accounts.map((account) => (
-            <AccountCard key={account.id} account={account} />
+            <AccountCard
+              key={account.id}
+              account={account}
+              onOpenQr={(acc) => setActiveQrAccount(acc)}
+              onRefresh={refreshAccounts}
+            />
           ))}
         </div>
       ) : (
@@ -303,41 +389,32 @@ const WhatsAppConnect = () => {
           <EmptyState
             icon={RiWhatsappLine}
             title="No WhatsApp accounts connected yet"
-            description="Add one above — every WhatsApp tool in RapidMailer will then let you pick it."
+            description="Click 'Add WhatsApp Account' above to link your phone via QR scan in seconds."
           />
         )
       )}
 
+      {/* Info Card */}
       <Card className="flex flex-col gap-4 p-6">
         <div className="flex items-center gap-3">
-          <RiInformationLine className="text-lg text-violet-300" />
-          <h3 className="font-semibold text-white">How to get these values (one-time setup, per account)</h3>
+          <RiShieldCheckLine className="text-xl text-emerald-400" />
+          <h3 className="font-semibold text-white">How QR Linking Works</h3>
         </div>
-        <ol className="flex flex-col gap-2 text-sm text-slate-400 list-none">
-          {[
-            <>Go to <span className="text-slate-200">developers.facebook.com</span> and create a Meta App (type: Business) — one per client works well, so their data stays separate.</>,
-            <>Inside the app, add the <span className="text-slate-200">WhatsApp</span> product.</>,
-            <>Under WhatsApp &gt; API Setup, copy the <span className="text-slate-200">Phone Number ID</span> and the{" "}
-              <span className="text-slate-200">WhatsApp Business Account ID</span> shown there.</>,
-            <>Generate a <span className="text-slate-200">permanent access token</span>: Meta Business Suite &gt; Business Settings &gt; System Users &gt; create a system user, assign it your WhatsApp app, and generate a token with{" "}
-              <code className="text-slate-300">whatsapp_business_messaging</code> permission.</>,
-            <>Paste everything into "Add Account" above and click "Test Connection", then "Save Account".</>,
-            <><span className="text-slate-200">Before sending to real leads</span>: submit at least one message{" "}
-              <span className="text-slate-200">template</span> for approval under WhatsApp &gt; Message Templates —
-              Meta requires an approved template for any message you send first (i.e. cold outreach). This can take
-              a few hours to a day to get approved.</>,
-            <>To message real customers (not just Meta's test numbers), you'll also need{" "}
-              <span className="text-slate-200">Meta Business verification</span> for that Business Manager account.</>,
-          ].map((text, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="grad-ring flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white">
-                {i + 1}
-              </span>
-              <span className="pt-0.5">{text}</span>
-            </li>
-          ))}
-        </ol>
+        <p className="text-sm text-slate-400 leading-relaxed">
+          {APP_NAME} connects as a linked secondary device using the standard WhatsApp Web multi-device protocol.
+          Your messages are end-to-end encrypted directly from your machine. No monthly Meta API conversation charges,
+          and zero template approval bureaucracy.
+        </p>
       </Card>
+
+      {/* QR Code Modal */}
+      {activeQrAccount && (
+        <QrModal
+          account={activeQrAccount}
+          onClose={() => setActiveQrAccount(null)}
+          onConnected={refreshAccounts}
+        />
+      )}
     </div>
   );
 };

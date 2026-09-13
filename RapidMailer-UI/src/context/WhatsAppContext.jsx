@@ -2,22 +2,18 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import axios from "axios";
 import { API_BASE_URL as API_BASE } from "../constants/api";
 
-// Shared WhatsApp connection state, used by every WhatsApp-related tool
-// (Bulk Sender, Number Filter). RapidMailer supports MULTIPLE connected
-// WhatsApp Business accounts at once — e.g. one per client project — so
-// this holds the whole list; each tool run picks one account by id rather
-// than there being a single global "the" connection.
 export const WhatsAppContext = createContext();
 
 export function WhatsAppProvider({ children }) {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [testing, setTesting] = useState(false);
   const [loadError, setLoadError] = useState(null);
 
   const [sending, setSending] = useState(false);
+  const [filtering, setFiltering] = useState(false);
   const [results, setResults] = useState([]);
+  const [filterResults, setFilterResults] = useState([]);
   const [sendError, setSendError] = useState(null);
 
   const fetchAccounts = useCallback(async () => {
@@ -37,14 +33,18 @@ export function WhatsAppProvider({ children }) {
     fetchAccounts();
   }, [fetchAccounts]);
 
-  const addAccount = async (draft) => {
+  const addAccount = async ({ label }) => {
     setSaving(true);
     try {
-      const response = await axios.post(`${API_BASE}/whatsapp/accounts`, draft);
+      const response = await axios.post(`${API_BASE}/whatsapp/accounts`, { label });
       await fetchAccounts();
-      return { ok: true, message: response.data.message || "Account added.", account: response.data.account };
+      return {
+        ok: true,
+        message: response.data.message || "WhatsApp account created.",
+        account: response.data.account,
+      };
     } catch (err) {
-      return { ok: false, message: err.response?.data?.error || err.message || "Failed to add account." };
+      return { ok: false, message: err.response?.data?.error || err.message || "Failed to create account." };
     } finally {
       setSaving(false);
     }
@@ -76,71 +76,99 @@ export function WhatsAppProvider({ children }) {
     }
   };
 
-  // draft: either { accessToken, phoneNumberId, apiVersion } for a not-yet-
-  // saved account, or { accountId } (optionally with overrides) to re-test
-  // a saved one.
-  const testConnection = async (draft) => {
-    setTesting(true);
+  const initSession = async (accountId) => {
     try {
-      const response = await axios.post(`${API_BASE}/whatsapp/test-connection`, draft);
-      if (draft.accountId) await fetchAccounts();
+      const response = await axios.post(`${API_BASE}/whatsapp/session/${accountId}/init`);
+      return { ok: true, data: response.data };
+    } catch (err) {
+      return { ok: false, error: err.response?.data?.error || err.message };
+    }
+  };
+
+  const getSessionStatus = async (accountId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/whatsapp/session/${accountId}/status`);
+      return { ok: true, data: response.data };
+    } catch (err) {
+      return { ok: false, error: err.response?.data?.error || err.message };
+    }
+  };
+
+  const logoutSession = async (accountId) => {
+    try {
+      const response = await axios.post(`${API_BASE}/whatsapp/session/${accountId}/logout`);
+      await fetchAccounts();
       return { ok: true, message: response.data.message };
     } catch (err) {
-      return { ok: false, message: err.response?.data?.error || err.message || "Connection test failed." };
-    } finally {
-      setTesting(false);
+      return { ok: false, error: err.response?.data?.error || err.message };
     }
   };
 
-  // The actual API call, with no side effect on this context's shared
-  // sending/results/sendError state — used by tools (like the Number
-  // Filter) that want to manage their own local loading/results state so
-  // they don't clobber the Bulk Sender's, and vice versa.
-  const sendBulkRaw = async ({ recipients, message, settings }) => {
+  // Instant protocol check without sending any messages
+  const filterNumbers = async ({ recipients, options }) => {
+    setFiltering(true);
     try {
-      const response = await axios.post(`${API_BASE}/whatsapp/send-bulk`, { recipients, message, settings });
-      return { ok: true, results: response.data.results || [], stats: response.data.stats };
+      const response = await axios.post(`${API_BASE}/whatsapp/filter-numbers`, { recipients, options });
+      setFilterResults(response.data.results || []);
+      return {
+        ok: true,
+        results: response.data.results || [],
+        valid: response.data.valid || [],
+        invalid: response.data.invalid || [],
+        stats: response.data.stats,
+      };
     } catch (err) {
-      return { ok: false, message: err.response?.data?.error || err.message || "Failed to send WhatsApp messages." };
+      return { ok: false, message: err.response?.data?.error || err.message || "Failed to filter numbers." };
+    } finally {
+      setFiltering(false);
     }
   };
 
-  // settings must include { accountId, batchSize, delayMs, defaultCountryCode }
+  // Bulk message sender with anti-ban safeguards
   const sendBulk = async ({ recipients, message, settings }) => {
     setSending(true);
     setSendError(null);
-    const res = await sendBulkRaw({ recipients, message, settings });
-    if (res.ok) {
-      setResults(res.results);
-    } else {
-      setSendError(res.message);
+    try {
+      const response = await axios.post(`${API_BASE}/whatsapp/send-bulk`, { recipients, message, settings });
+      setResults(response.data.results || []);
+      return { ok: true, results: response.data.results || [], stats: response.data.stats };
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || "Failed to send WhatsApp messages.";
+      setSendError(msg);
+      return { ok: false, message: msg };
+    } finally {
+      setSending(false);
     }
-    setSending(false);
-    return res;
   };
 
   const value = {
     accounts,
     loading,
     saving,
-    testing,
     loadError,
     refreshAccounts: fetchAccounts,
     addAccount,
     updateAccount,
     deleteAccount,
-    testConnection,
+    initSession,
+    getSessionStatus,
+    logoutSession,
     sending,
+    filtering,
     results,
     setResults,
+    filterResults,
+    setFilterResults,
     sendError,
     sendBulk,
-    sendBulkRaw,
+    filterNumbers,
   };
 
   return <WhatsAppContext.Provider value={value}>{children}</WhatsAppContext.Provider>;
 }
 
 export function useWhatsApp() {
-  return useContext(WhatsAppContext);
+  const ctx = useContext(WhatsAppContext);
+  if (!ctx) throw new Error("useWhatsApp must be used within a WhatsAppProvider");
+  return ctx;
 }
