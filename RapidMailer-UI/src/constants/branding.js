@@ -8,7 +8,7 @@
  *
  * Can also be overridden at build or runtime using VITE_APP_NAME in .env
  */
-export const APP_NAME = import.meta.env.VITE_APP_NAME || "Omini Pulse";
+export const APP_NAME = import.meta.env.VITE_APP_NAME || "Omini Plus";
 
 export const APP_CONFIG = {
   name: APP_NAME,

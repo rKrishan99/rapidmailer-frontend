@@ -72,7 +72,7 @@ const Sidebar = () => {
     >
       <div className="flex items-center gap-3 px-4 py-5">
         <img
-          className={`${isExpand ? "w-[150px]" : "w-0"} overflow-hidden transition-all duration-300`}
+          className={`${isExpand ? "w-[220px]" : "w-0"} overflow-hidden transition-all duration-300`}
           src={images.logo}
           alt={APP_NAME}
         />
