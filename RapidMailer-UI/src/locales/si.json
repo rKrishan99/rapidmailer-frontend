@@ -1,0 +1,71 @@
+﻿{
+  "nav": {
+    "overview": "සාරාංශය",
+    "dashboard": "උපකරණ පුවරුව",
+    "all_tools": "සියලු මෙවලම් (22)",
+    "tool_suites": "මෙවලම් කට්ටල",
+    "lead_scraping": "Leads ලබාගැනීම (7)",
+    "whatsapp_suite": "WhatsApp මෙවලම් (13)",
+    "email_suite": "Email මෙවලම් (2)",
+    "accounts": "ගිණුම්",
+    "whatsapp_accounts": "WhatsApp ගිණුම්",
+    "email_accounts": "Email ගිණුම්",
+    "settings": "සැකසුම්"
+  },
+  "header": {
+    "tagline": "Leads, සත්‍යාපනය සහ Campaigns — සියල්ල එකම තැනකින්"
+  },
+  "settings": {
+    "title": "පද්ධති සැකසුම්",
+    "subtitle": "OmniPlus+ හි Scraping, තේමා, බලපත්‍ර සහ 90-දින දෝෂ සටහන් කළමනාකරණය කරන්න.",
+    "save_changes": "වෙනස්කම් සුරකින්න",
+    "saving": "සුරකිමින්...",
+    "tabs": {
+      "general": "පොදු සහ Scraping",
+      "appearance": "පෙනුම සහ තේමා",
+      "license": "බලපත්‍රය සහ සැලසුම",
+      "diagnostics": "දෝෂ විනිශ්චය සහ සටහන්"
+    },
+    "appearance": {
+      "themes_title": "ඇසට පහසු තේමා පද්ධතිය",
+      "themes_desc": "දීර්ඝ වේලාවක් වැඩසටහන් මෙහෙයුම් කිරීමේදී ඇසේ විඩාව අවම කිරීම සඳහා සකස් කළ වර්ණ පද්ධතිය.",
+      "language_title": "භාෂාව සහ ප්‍රාදේශීයකරණය",
+      "language_desc": "OmniPlus+ ඩෙස්ක්ටොප් අතුරුමුහුණත සඳහා ඔබ කැමති භාෂාව තෝරන්න.",
+      "live_preview": "සජීවී පෙරදසුන"
+    },
+    "license": {
+      "title": "බලපත්‍රය සහ උපකරණ බැඳීම",
+      "desc": "යන්ත්‍ර බලයලත් තත්ත්වය සහ වාණිජ මට්ටමේ හිමිකම් තත්ත්වය.",
+      "registered_user": "ලියාපදිංචි පරිශීලකයා",
+      "license_key": "බලපත්‍ර යතුර",
+      "hwid": "යන්ත්‍ර HWID (Hardware Fingerprint)",
+      "copy_hwid": "HWID පිටපත් කරන්න",
+      "activate_new": "නව බලපත්‍රයක් සක්‍රිය කරන්න",
+      "upgrade_plan": "සැලැස්ම උත්ශ්‍රේණි කරන්න"
+    },
+    "diagnostics": {
+      "title": "පද්ධති දෝෂ විනිශ්චය සහ 90-දින සටහන්",
+      "desc": "සංවේදී දත්ත රහිතව ස්වයංක්‍රීයව ලියැවෙන පද්ධති සටහන්. දින 90 කට පසු ස්වයංක්‍රීයව ඉවත් කෙරේ.",
+      "export_logs": "සටහන් බාගත කරන්න",
+      "send_report": "දෝෂ වාර්තාව යවන්න",
+      "refresh": "නැවුම් කරන්න",
+      "severity": "දෝෂ මට්ටම"
+    }
+  },
+  "omini": {
+    "title": "Omini AI සහායකයා",
+    "subtitle": "ක්‍රියාකාරී සන්දර්භය හඳුනාගන්නා ව්‍යාපාරික සහායක",
+    "placeholder": "Lead scraping, cold email, WhatsApp anti-ban පිළිබඳව Omini ගෙන් අසන්න...",
+    "send": "යවන්න",
+    "context": "ක්‍රියාකාරී පිටුව",
+    "locked_title": "Omini AI සහායකයා අගුලු දමා ඇත",
+    "locked_desc": "Omini AI Copilot යනු Outreach Pro සහ Omni All-in-One Suite බලපත්‍රලාභීන් සඳහා වූ සුවිශේෂී විශේෂාංගයකි.",
+    "upgrade_cta": "විශේෂාංගය අගුළු ඇරීමට උත්ශ්‍රේණි කරන්න",
+    "copy": "පිටපත් කරන්න",
+    "copied": "පිටපත් විය!",
+    "quick_prompts": "ක්ෂණික විමසුම්",
+    "prompt_cold_email": "සාර්ථක Cold Email එකක් ලියන්න",
+    "prompt_whatsapp_warmup": "ආරක්ෂිත WhatsApp Warmup කාලසටහන",
+    "prompt_gmap_matrix": "Google Maps Grid Scraper සඳහා උපදෙස්"
+  }
+}

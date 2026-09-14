@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "希望の言語を選択してください。",
+                                        "language_title":  "表示言語",
+                                        "live_preview":  "ライブプレビュー",
+                                        "themes_title":  "エルゴノミックテーマ",
+                                        "themes_desc":  "目の疲労を軽減する洗練されたパレット。"
+                                    },
+                     "subtitle":  "スクレイピング、テーマ、デバイスライセンス、90日間ログを管理。",
+                     "license":  {
+                                     "upgrade_plan":  "プランをアップグレード",
+                                     "title":  "ライセンス \u0026 デバイスバインド",
+                                     "copy_hwid":  "HWID をコピー",
+                                     "hwid":  "マシン HWID",
+                                     "license_key":  "ライセンスキー",
+                                     "registered_user":  "登録ユーザー",
+                                     "desc":  "ハードウェア認証ステータス。",
+                                     "activate_new":  "新規ライセンスを有効化"
+                                 },
+                     "title":  "設定",
+                     "saving":  "保存中...",
+                     "save_changes":  "変更を保存",
+                     "diagnostics":  {
+                                         "export_logs":  "ログをエクスポート",
+                                         "refresh":  "更新",
+                                         "send_report":  "診断レポートを送信",
+                                         "desc":  "機密情報を除外した自動ログ。90日後に自動削除。",
+                                         "severity":  "重要度",
+                                         "title":  "システム診断"
+                                     },
+                     "tabs":  {
+                                  "license":  "ライセンス \u0026 プラン",
+                                  "diagnostics":  "診断 \u0026 ログ",
+                                  "general":  "一般 \u0026 スクレイピング",
+                                  "appearance":  "外観 \u0026 テーマ"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "リード、検証、キャンペーン — すべてを1つの場所で"
+               },
+    "omini":  {
+                  "subtitle":  "コンテキスト連動型自動化アシスタント",
+                  "prompt_gmap_matrix":  "Google Maps グリッド活用のコツ",
+                  "copied":  "コピー完了！",
+                  "quick_prompts":  "クイックプロンプト",
+                  "title":  "Omini AI コパイロット",
+                  "send":  "送信",
+                  "upgrade_cta":  "アップグレードしてロック解除",
+                  "context":  "現在の画面",
+                  "locked_desc":  "Pro および Omni All-in-One Suite ライセンス専用機能です。",
+                  "locked_title":  "Omini AI はロックされています",
+                  "prompt_whatsapp_warmup":  "安全な WhatsApp ウォームアップ",
+                  "prompt_cold_email":  "高成約率コールドメールの作成",
+                  "placeholder":  "リード獲得、コールドメール、WhatsApp について質問...",
+                  "copy":  "コピー"
+              },
+    "nav":  {
+                "accounts":  "アカウント",
+                "email_accounts":  "メールアカウント",
+                "email_suite":  "メールスイート (2)",
+                "overview":  "概要",
+                "whatsapp_suite":  "WhatsApp スイート (13)",
+                "all_tools":  "全ツール (22)",
+                "dashboard":  "ダッシュボード",
+                "settings":  "設定",
+                "tool_suites":  "ツールスイート",
+                "lead_scraping":  "リード獲得 (7)",
+                "whatsapp_accounts":  "WhatsApp アカウント"
+            }
+}

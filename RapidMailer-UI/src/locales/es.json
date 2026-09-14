@@ -1,0 +1,71 @@
+﻿{
+  "nav": {
+    "overview": "Resumen",
+    "dashboard": "Panel de Control",
+    "all_tools": "Todas las Herramientas (22)",
+    "tool_suites": "Suites de Herramientas",
+    "lead_scraping": "Extracción de Prospectos (7)",
+    "whatsapp_suite": "Suite de WhatsApp (13)",
+    "email_suite": "Suite de Email (2)",
+    "accounts": "Cuentas",
+    "whatsapp_accounts": "Cuentas de WhatsApp",
+    "email_accounts": "Cuentas de Email",
+    "settings": "Configuración"
+  },
+  "header": {
+    "tagline": "Prospectos, verificación y campañas — todo en un solo lugar"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Administre la ejecución de scraping, temas visuales ergonómicos, licencias de hardware y registros de diagnóstico de 90 días para OmniPlus+.",
+    "save_changes": "Guardar Cambios",
+    "saving": "Guardando...",
+    "tabs": {
+      "general": "General y Scraping",
+      "appearance": "Apariencia y Temas",
+      "license": "Licencia y Plan",
+      "diagnostics": "Diagnóstico y Registros"
+    },
+    "appearance": {
+      "themes_title": "Temas Ergonómicos para el Confort Visual",
+      "themes_desc": "Paletas calibradas científicamente diseñadas para minimizar la fatiga visual durante sesiones prolongadas.",
+      "language_title": "Idioma y Localización",
+      "language_desc": "Seleccione su idioma preferido para la interfaz de escritorio de OmniPlus+.",
+      "live_preview": "Vista Previa en Vivo"
+    },
+    "license": {
+      "title": "Licencia y Vinculación de Dispositivo",
+      "desc": "Autorización de hardware de máquina y estado de derecho de nivel comercial.",
+      "registered_user": "Usuario Registrado",
+      "license_key": "Clave de Licencia",
+      "hwid": "HWID de Máquina (Huella de Hardware)",
+      "copy_hwid": "Copiar HWID",
+      "activate_new": "Activar Nueva Licencia",
+      "upgrade_plan": "Actualizar Plan"
+    },
+    "diagnostics": {
+      "title": "Diagnósticos del Sistema y Registros de 90 Días",
+      "desc": "Telemetría rotativa automatizada con credenciales sensibles redactadas. Purgado automático después de 90 días.",
+      "export_logs": "Exportar Registros",
+      "send_report": "Enviar Informe de Diagnóstico",
+      "refresh": "Actualizar",
+      "severity": "Severidad"
+    }
+  },
+  "omini": {
+    "title": "Copiloto de IA Omini",
+    "subtitle": "Especialista en Automatización y Crecimiento Consciente del Contexto",
+    "placeholder": "Pregúntele a Omini sobre scraping de prospectos, cold email, prevención de bloqueos...",
+    "send": "Enviar",
+    "context": "Contexto Activo",
+    "locked_title": "Copiloto de IA Omini Bloqueado",
+    "locked_desc": "El Copiloto de IA Omini es una función exclusiva para titulares de licencias Outreach Pro y Omni All-in-One Suite.",
+    "upgrade_cta": "Actualizar Licencia para Desbloquear",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "quick_prompts": "Sugerencias Rápidas",
+    "prompt_cold_email": "Escribir un cold email de alta conversión",
+    "prompt_whatsapp_warmup": "Horario seguro de calentamiento de WhatsApp",
+    "prompt_gmap_matrix": "Consejos para el extractor en cuadrícula de Google Maps"
+  }
+}

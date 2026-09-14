@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "Choisissez votre langue préférée.",
+                                        "language_title":  "Langue d\u0027Affichage",
+                                        "live_preview":  "Aperçu en Direct",
+                                        "themes_title":  "Thèmes Ergonomiques",
+                                        "themes_desc":  "Palettes réduisant la fatigue visuelle."
+                                    },
+                     "subtitle":  "Gérer le scraping, les thèmes, les licences et la télémétrie.",
+                     "license":  {
+                                     "upgrade_plan":  "Améliorer le Forfait",
+                                     "title":  "Licence \u0026 Matériel",
+                                     "copy_hwid":  "Copier HWID",
+                                     "hwid":  "HWID Machine",
+                                     "license_key":  "Clé de Licence",
+                                     "registered_user":  "Utilisateur Enregistré",
+                                     "desc":  "Statut d\u0027autorisation.",
+                                     "activate_new":  "Activer une Licence"
+                                 },
+                     "title":  "Paramètres",
+                     "saving":  "Enregistrement...",
+                     "save_changes":  "Enregistrer",
+                     "diagnostics":  {
+                                         "export_logs":  "Exporter",
+                                         "refresh":  "Actualiser",
+                                         "send_report":  "Envoyer le Rapport",
+                                         "desc":  "Télémétrie avec informations masquées.",
+                                         "severity":  "Gravité",
+                                         "title":  "Diagnostics Système"
+                                     },
+                     "tabs":  {
+                                  "license":  "Licence \u0026 Forfait",
+                                  "diagnostics":  "Diagnostics \u0026 Journaux",
+                                  "general":  "Général \u0026 Scraping",
+                                  "appearance":  "Apparence \u0026 Thèmes"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "Prospects, vérification \u0026 campagnes — tout au même endroit"
+               },
+    "omini":  {
+                  "subtitle":  "Spécialiste de la Croissance",
+                  "prompt_gmap_matrix":  "Conseils Google Maps Grid",
+                  "copied":  "Copié !",
+                  "quick_prompts":  "Suggestions",
+                  "title":  "Copilote IA Omini",
+                  "send":  "Envoyer",
+                  "upgrade_cta":  "Mettre à niveau",
+                  "context":  "Contexte Actuel",
+                  "locked_desc":  "Fonctionnalité exclusive pour les forfaits Pro et Suite.",
+                  "locked_title":  "Copilote IA Verrouillé",
+                  "prompt_whatsapp_warmup":  "Calendrier de chauffe WhatsApp",
+                  "prompt_cold_email":  "Rédiger un cold email performant",
+                  "placeholder":  "Posez une question à Omini...",
+                  "copy":  "Copier"
+              },
+    "nav":  {
+                "accounts":  "Comptes",
+                "email_accounts":  "Comptes Email",
+                "email_suite":  "Suite Email (2)",
+                "overview":  "Aperçu",
+                "whatsapp_suite":  "Suite WhatsApp (13)",
+                "all_tools":  "Tous les Outils (22)",
+                "dashboard":  "Tableau de Bord",
+                "settings":  "Paramètres",
+                "tool_suites":  "Suites d\u0027Outils",
+                "lead_scraping":  "Extraction de Prospects (7)",
+                "whatsapp_accounts":  "Comptes WhatsApp"
+            }
+}

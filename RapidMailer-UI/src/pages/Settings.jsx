@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RiSettings3Line,
   RiPaletteLine,
@@ -16,13 +17,6 @@ import AppearanceView from "../components/settings/AppearanceView";
 import LicenseView from "../components/settings/LicenseView";
 import DiagnosticsView from "../components/settings/DiagnosticsView";
 import { APP_NAME } from "../constants/branding";
-
-const TABS = [
-  { id: "general",     label: "General & Scraping",    icon: RiSettings3Line },
-  { id: "appearance",  label: "Appearance & Themes",   icon: RiPaletteLine },
-  { id: "license",     label: "License & Plan",        icon: RiKey2Line },
-  { id: "diagnostics", label: "Diagnostics & Logs",    icon: RiHeartPulseLine },
-];
 
 function Banner({ result }) {
   if (!result) return null;
@@ -42,6 +36,7 @@ function Banner({ result }) {
 }
 
 const Settings = () => {
+  const { t } = useTranslation();
   const { settings, loading, loadError, saving, saveSettings } = useSettings();
 
   const [activeTab, setActiveTab] = useState("general");
@@ -49,6 +44,13 @@ const Settings = () => {
   const [editingApiKey, setEditingApiKey] = useState(false);
   const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [saveResult, setSaveResult] = useState(null);
+
+  const tabs = [
+    { id: "general",     label: t("settings.tabs.general", "General & Scraping"),    icon: RiSettings3Line },
+    { id: "appearance",  label: t("settings.tabs.appearance", "Appearance & Themes"), icon: RiPaletteLine },
+    { id: "license",     label: t("settings.tabs.license", "License & Plan"),        icon: RiKey2Line },
+    { id: "diagnostics", label: t("settings.tabs.diagnostics", "Diagnostics & Logs"), icon: RiHeartPulseLine },
+  ];
 
   useEffect(() => {
     if (settings && !form) {
@@ -59,7 +61,7 @@ const Settings = () => {
   if (loading || !form) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
-        <PageHeader eyebrow="System" title="Settings" />
+        <PageHeader eyebrow="System" title={t("settings.title", "Settings")} />
         <SectionLoader label="Loading enterprise settings…" />
       </div>
     );
@@ -68,7 +70,7 @@ const Settings = () => {
   if (loadError) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
-        <PageHeader eyebrow="System" title="Settings" />
+        <PageHeader eyebrow="System" title={t("settings.title", "Settings")} />
         <p style={{ color: "#f87171" }}>{loadError}</p>
       </div>
     );
@@ -87,12 +89,12 @@ const Settings = () => {
     <div className="flex flex-col gap-8 p-6 md:p-10 max-w-7xl mx-auto w-full">
       <PageHeader
         eyebrow="System Hub"
-        title="Settings"
-        description={`Manage scraping execution, visual ergonomic themes, device licensing, and 90-day diagnostic telemetry for ${APP_NAME}.`}
+        title={t("settings.title", "Settings")}
+        description={t("settings.subtitle", `Manage scraping execution, visual ergonomic themes, device licensing, and 90-day diagnostic telemetry for ${APP_NAME}.`)}
         actions={
           activeTab === "general" ? (
             <Button onClick={handleSaveGeneral} disabled={saving}>
-              {saving ? "Saving…" : "Save Changes"}
+              {saving ? t("settings.saving", "Saving…") : t("settings.save_changes", "Save Changes")}
             </Button>
           ) : null
         }
@@ -103,7 +105,7 @@ const Settings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Vertical sub-nav */}
         <aside className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
             return (

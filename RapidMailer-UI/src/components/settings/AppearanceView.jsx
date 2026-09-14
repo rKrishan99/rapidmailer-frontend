@@ -1,9 +1,19 @@
 ﻿import { useState, useEffect } from "react";
-import { RiPaletteLine, RiCheckLine, RiSunLine, RiMoonLine, RiEyeLine } from "react-icons/ri";
+import { useTranslation } from "react-i18next";
+import {
+  RiPaletteLine,
+  RiCheckLine,
+  RiSunLine,
+  RiMoonLine,
+  RiEyeLine,
+  RiTranslate2,
+} from "react-icons/ri";
 import Card from "../ui/Card";
+import LanguageSelector from "../ui/LanguageSelector";
 import { THEMES, getStoredTheme, setTheme } from "../../utils/themeManager";
 
 export default function AppearanceView() {
+  const { t } = useTranslation();
   const [currentTheme, setCurrentTheme] = useState("carbon");
 
   useEffect(() => {
@@ -17,6 +27,7 @@ export default function AppearanceView() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Themes Card */}
       <Card className="flex flex-col gap-6 p-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
@@ -25,10 +36,13 @@ export default function AppearanceView() {
             </div>
             <div>
               <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                Ergonomic Eye-Comfort Themes
+                {t("settings.appearance.themes_title", "Ergonomic Eye-Comfort Themes")}
               </h3>
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Scientifically calibrated palettes designed to minimise eye strain during extensive outreach workflows.
+                {t(
+                  "settings.appearance.themes_desc",
+                  "Scientifically calibrated palettes designed to minimise eye strain during extensive outreach workflows."
+                )}
               </p>
             </div>
           </div>
@@ -41,7 +55,7 @@ export default function AppearanceView() {
             }}
           >
             <RiEyeLine style={{ color: "var(--accent-primary)" }} />
-            <span>Instant Live Preview</span>
+            <span>{t("settings.appearance.live_preview", "Instant Live Preview")}</span>
           </div>
         </div>
 
@@ -67,7 +81,7 @@ export default function AppearanceView() {
                         {theme.name}
                       </span>
                       {theme.type === "light" ? (
-                        <span className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-amber-400/20 text-amber-400">
+                        <span className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-amber-400/20 text-amber-500 font-semibold">
                           <RiSunLine /> Light
                         </span>
                       ) : (
@@ -124,6 +138,30 @@ export default function AppearanceView() {
               </div>
             );
           })}
+        </div>
+      </Card>
+
+      {/* Multi-Language & Localization Card */}
+      <Card className="flex flex-col gap-5 p-6">
+        <div className="flex items-center gap-3">
+          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl text-white shrink-0">
+            <RiTranslate2 className="text-lg" />
+          </div>
+          <div>
+            <h3 className="font-semibold" style={{ color: "var(--text-primary)" }}>
+              {t("settings.appearance.language_title", "Display Language & Localization")}
+            </h3>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {t(
+                "settings.appearance.language_desc",
+                "Select your preferred language for the OmniPlus+ desktop interface."
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+          <LanguageSelector variant="expanded" />
         </div>
       </Card>
     </div>

@@ -1,0 +1,71 @@
+﻿{
+  "nav": {
+    "overview": "Overview",
+    "dashboard": "Dashboard",
+    "all_tools": "All Tools (22)",
+    "tool_suites": "Tool Suites",
+    "lead_scraping": "Lead Scraping (7)",
+    "whatsapp_suite": "WhatsApp Suite (13)",
+    "email_suite": "Email Suite (2)",
+    "accounts": "Accounts",
+    "whatsapp_accounts": "WhatsApp Accounts",
+    "email_accounts": "Email Accounts",
+    "settings": "Settings"
+  },
+  "header": {
+    "tagline": "Leads, verification & campaigns — all in one place"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage scraping execution, visual ergonomic themes, device licensing, and 90-day diagnostic telemetry for OmniPlus+.",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "tabs": {
+      "general": "General & Scraping",
+      "appearance": "Appearance & Themes",
+      "license": "License & Plan",
+      "diagnostics": "Diagnostics & Logs"
+    },
+    "appearance": {
+      "themes_title": "Ergonomic Eye-Comfort Themes",
+      "themes_desc": "Scientifically calibrated palettes designed to minimise eye strain during extensive outreach workflows.",
+      "language_title": "Display Language & Localization",
+      "language_desc": "Select your preferred language for the OmniPlus+ desktop interface.",
+      "live_preview": "Instant Live Preview"
+    },
+    "license": {
+      "title": "License & Device Binding",
+      "desc": "Hardware machine authorization and commercial tier entitlement status.",
+      "registered_user": "Registered User",
+      "license_key": "License Key",
+      "hwid": "Machine HWID (Hardware Fingerprint)",
+      "copy_hwid": "Copy HWID",
+      "activate_new": "Activate New License",
+      "upgrade_plan": "Upgrade Plan"
+    },
+    "diagnostics": {
+      "title": "System Diagnostics & 90-Day Event Logs",
+      "desc": "Automated rotating telemetry with sensitive credentials redacted. Pruned automatically after 90 days.",
+      "export_logs": "Export Logs",
+      "send_report": "Send Diagnostic Report",
+      "refresh": "Refresh",
+      "severity": "Severity"
+    }
+  },
+  "omini": {
+    "title": "Omini AI Copilot",
+    "subtitle": "Context-Aware Growth & Automation Specialist",
+    "placeholder": "Ask Omini about lead scraping, cold email, WhatsApp anti-ban...",
+    "send": "Send",
+    "context": "Active Context",
+    "locked_title": "Omini AI Copilot Locked",
+    "locked_desc": "Omini AI Copilot is an exclusive feature for Outreach Pro & Omni All-in-One Suite license holders. Unlock real-time campaign copy, anti-ban pacing advice, and extraction tips.",
+    "upgrade_cta": "Upgrade License to Unlock",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "quick_prompts": "Quick Prompts",
+    "prompt_cold_email": "Write a high-converting cold email",
+    "prompt_whatsapp_warmup": "Safe WhatsApp warmup schedule",
+    "prompt_gmap_matrix": "Tips for Google Maps grid scraper"
+  }
+}

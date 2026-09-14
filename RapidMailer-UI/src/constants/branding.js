@@ -15,7 +15,7 @@ export const APP_CONFIG = {
   shortName: APP_NAME,
   tagline: "All-in-One Lead Generation, Email & WhatsApp Automation Solution",
   description: `Powerful tools to find leads, verify emails, and launch successful outreach campaigns — without leaving one dashboard.`,
-  version: "v3.2.1",
+  version: "v4.0",
   defaultSenderName: APP_NAME,
 };
 

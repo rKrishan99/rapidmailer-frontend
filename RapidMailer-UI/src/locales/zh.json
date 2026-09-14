@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "选择 OmniPlus+ 的首选显示语言。",
+                                        "language_title":  "界面语言",
+                                        "live_preview":  "实时预览",
+                                        "themes_title":  "护眼色彩主题",
+                                        "themes_desc":  "经过科学调配的高清防疲劳调色板。"
+                                    },
+                     "subtitle":  "管理数据采集、人机工学主题、设备授权及 90 天运行日志。",
+                     "license":  {
+                                     "upgrade_plan":  "升级套餐",
+                                     "title":  "设备授权与激活",
+                                     "copy_hwid":  "复制 HWID",
+                                     "hwid":  "机器指纹 HWID",
+                                     "license_key":  "授权密钥",
+                                     "registered_user":  "注册用户",
+                                     "desc":  "机器硬件认证及商业版权限状态。",
+                                     "activate_new":  "激活新授权"
+                                 },
+                     "title":  "设置中心",
+                     "saving":  "保存中...",
+                     "save_changes":  "保存设置",
+                     "diagnostics":  {
+                                         "export_logs":  "导出日志",
+                                         "refresh":  "刷新",
+                                         "send_report":  "发送诊断报告",
+                                         "desc":  "脱敏自动化运行记录，90 天后自动清理。",
+                                         "severity":  "日志级别",
+                                         "title":  "系统诊断与运行日志"
+                                     },
+                     "tabs":  {
+                                  "license":  "授权与套餐",
+                                  "diagnostics":  "诊断与日志",
+                                  "general":  "常规与采集",
+                                  "appearance":  "外观与主题"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "销售线索、邮箱验证与外发营销 — 一站式完成"
+               },
+    "omini":  {
+                  "subtitle":  "上下文感知营销拓客专家",
+                  "prompt_gmap_matrix":  "谷歌地图网格采集技巧",
+                  "copied":  "已复制！",
+                  "quick_prompts":  "快捷提示词",
+                  "title":  "Omini 智能助手",
+                  "send":  "发送",
+                  "upgrade_cta":  "升级授权以解锁",
+                  "context":  "当前页面",
+                  "locked_desc":  "Omini AI 助手为专业版及全功能套件用户专享功能。",
+                  "locked_title":  "Omini 助手未解锁",
+                  "prompt_whatsapp_warmup":  "WhatsApp 安全养号计划",
+                  "prompt_cold_email":  "撰写高转化率冷邮件",
+                  "placeholder":  "向 Omini 咨询地图采集、防封策略、冷邮件话术...",
+                  "copy":  "复制"
+              },
+    "nav":  {
+                "accounts":  "账户管理",
+                "email_accounts":  "邮件账户",
+                "email_suite":  "邮件套件 (2)",
+                "overview":  "概览",
+                "whatsapp_suite":  "WhatsApp 套件 (13)",
+                "all_tools":  "所有工具 (22)",
+                "dashboard":  "仪表盘",
+                "settings":  "系统设置",
+                "tool_suites":  "工具套件",
+                "lead_scraping":  "线索采集 (7)",
+                "whatsapp_accounts":  "WhatsApp 账户"
+            }
+}

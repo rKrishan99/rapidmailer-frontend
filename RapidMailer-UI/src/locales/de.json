@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "Wählen Sie Ihre Sprache.",
+                                        "language_title":  "Sprache",
+                                        "live_preview":  "Live-Vorschau",
+                                        "themes_title":  "Ergonomische Themes",
+                                        "themes_desc":  "Augenschonende Farbpaletten."
+                                    },
+                     "subtitle":  "Scraping, Themes, Lizenzen und Diagnoseprotokolle verwalten.",
+                     "license":  {
+                                     "upgrade_plan":  "Plan upgraden",
+                                     "title":  "Lizenz \u0026 Bindung",
+                                     "copy_hwid":  "HWID kopieren",
+                                     "hwid":  "Maschinen-HWID",
+                                     "license_key":  "Lizenzschlüssel",
+                                     "registered_user":  "Registrierter Benutzer",
+                                     "desc":  "Hardware-Autorisierungsstatus.",
+                                     "activate_new":  "Neue Lizenz aktivieren"
+                                 },
+                     "title":  "Einstellungen",
+                     "saving":  "Wird gespeichert...",
+                     "save_changes":  "Speichern",
+                     "diagnostics":  {
+                                         "export_logs":  "Exportieren",
+                                         "refresh":  "Aktualisieren",
+                                         "send_report":  "Bericht senden",
+                                         "desc":  "Automatische Protokolle ohne sensible Daten.",
+                                         "severity":  "Schweregrad",
+                                         "title":  "Systemdiagnose"
+                                     },
+                     "tabs":  {
+                                  "license":  "Lizenz \u0026 Plan",
+                                  "diagnostics":  "Diagnose \u0026 Protokolle",
+                                  "general":  "Allgemein \u0026 Scraping",
+                                  "appearance":  "Erscheinungsbild"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "Leads, Verifizierung \u0026 Kampagnen — alles an einem Ort"
+               },
+    "omini":  {
+                  "subtitle":  "Wachstums- \u0026 Automatisierungsassistent",
+                  "prompt_gmap_matrix":  "Tipps für Google Maps Grid",
+                  "copied":  "Kopiert!",
+                  "quick_prompts":  "Schnellvorschläge",
+                  "title":  "Omini KI-Copilot",
+                  "send":  "Senden",
+                  "upgrade_cta":  "Jetzt upgraden",
+                  "context":  "Aktueller Kontext",
+                  "locked_desc":  "Exklusives Feature für Pro- \u0026 Suite-Lizenzen.",
+                  "locked_title":  "Omini KI gesperrt",
+                  "prompt_whatsapp_warmup":  "Sicherer WhatsApp-Aufwärmplan",
+                  "prompt_cold_email":  "Erfolgreiche Cold-E-Mail verfassen",
+                  "placeholder":  "Fragen Sie Omini über Lead-Scraping...",
+                  "copy":  "Kopieren"
+              },
+    "nav":  {
+                "accounts":  "Konten",
+                "email_accounts":  "E-Mail-Konten",
+                "email_suite":  "E-Mail-Suite (2)",
+                "overview":  "Übersicht",
+                "whatsapp_suite":  "WhatsApp-Suite (13)",
+                "all_tools":  "Alle Werkzeuge (22)",
+                "dashboard":  "Dashboard",
+                "settings":  "Einstellungen",
+                "tool_suites":  "Tool-Suiten",
+                "lead_scraping":  "Lead-Scraping (7)",
+                "whatsapp_accounts":  "WhatsApp-Konten"
+            }
+}

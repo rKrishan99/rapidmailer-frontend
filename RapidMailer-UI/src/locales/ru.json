@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "Выберите язык для интерфейса OmniPlus+.",
+                                        "language_title":  "Язык интерфейса",
+                                        "live_preview":  "Предпросмотр",
+                                        "themes_title":  "Эргономичные темы",
+                                        "themes_desc":  "Цветовые палитры для снижения усталости глаз."
+                                    },
+                     "subtitle":  "Управление парсингом, темами, лицензиями и 90-дневными логами.",
+                     "license":  {
+                                     "upgrade_plan":  "Обновить тариф",
+                                     "title":  "Лицензия и привязка",
+                                     "copy_hwid":  "Скопировать HWID",
+                                     "hwid":  "HWID устройства",
+                                     "license_key":  "Лицензионный ключ",
+                                     "registered_user":  "Пользователь",
+                                     "desc":  "Статус авторизации оборудования.",
+                                     "activate_new":  "Активировать лицензию"
+                                 },
+                     "title":  "Настройки",
+                     "saving":  "Сохранение...",
+                     "save_changes":  "Сохранить",
+                     "diagnostics":  {
+                                         "export_logs":  "Экспорт логов",
+                                         "refresh":  "Обновить",
+                                         "send_report":  "Отправить отчёт",
+                                         "desc":  "Безопасные системные логи без конфиденциальных данных.",
+                                         "severity":  "Важность",
+                                         "title":  "Диагностика системы"
+                                     },
+                     "tabs":  {
+                                  "license":  "Лицензия и тариф",
+                                  "diagnostics":  "Диагностика и логи",
+                                  "general":  "Общие и парсинг",
+                                  "appearance":  "Внешний вид"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "Лиды, валидация и кампании — всё в одной системе"
+               },
+    "omini":  {
+                  "subtitle":  "Контекстный помощник по привлечению клиентов",
+                  "prompt_gmap_matrix":  "Советы по Google Maps Grid",
+                  "copied":  "Скопировано!",
+                  "quick_prompts":  "Быстрые запросы",
+                  "title":  "AI-ассистент Omini",
+                  "send":  "Отправить",
+                  "upgrade_cta":  "Обновить лицензию для разблокировки",
+                  "context":  "Текущий раздел",
+                  "locked_desc":  "Доступно только для владельцев лицензий Pro и Suite.",
+                  "locked_title":  "Omini AI заблокирован",
+                  "prompt_whatsapp_warmup":  "Безопасный прогрев WhatsApp",
+                  "prompt_cold_email":  "Написать эффективное холодное письмо",
+                  "placeholder":  "Спросите Omini о сборе лидов, холодных письмах и WhatsApp...",
+                  "copy":  "Копировать"
+              },
+    "nav":  {
+                "accounts":  "Аккаунты",
+                "email_accounts":  "Email аккаунты",
+                "email_suite":  "Email рассылки (2)",
+                "overview":  "Обзор",
+                "whatsapp_suite":  "WhatsApp решения (13)",
+                "all_tools":  "Все инструменты (22)",
+                "dashboard":  "Панель управления",
+                "settings":  "Настройки",
+                "tool_suites":  "Наборы инструментов",
+                "lead_scraping":  "Сбор лидов (7)",
+                "whatsapp_accounts":  "WhatsApp аккаунты"
+            }
+}

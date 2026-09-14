@@ -1,0 +1,71 @@
+﻿{
+    "settings":  {
+                     "appearance":  {
+                                        "language_desc":  "Escolha seu idioma de preferência.",
+                                        "language_title":  "Idioma de Exibição",
+                                        "live_preview":  "Prévia em Tempo Real",
+                                        "themes_title":  "Temas Ergonômicos",
+                                        "themes_desc":  "Paletas para reduzir o cansaço visual."
+                                    },
+                     "subtitle":  "Gerencie raspagem, temas ergonômicos, licenças e registros de diagnóstico.",
+                     "license":  {
+                                     "upgrade_plan":  "Fazer Upgrade do Plano",
+                                     "title":  "Licença e Dispositivo",
+                                     "copy_hwid":  "Copiar HWID",
+                                     "hwid":  "HWID da Máquina",
+                                     "license_key":  "Chave de Licença",
+                                     "registered_user":  "Usuário Registrado",
+                                     "desc":  "Status de autorização de hardware.",
+                                     "activate_new":  "Ativar Nova Licença"
+                                 },
+                     "title":  "Configurações",
+                     "saving":  "Salvando...",
+                     "save_changes":  "Salvar Alterações",
+                     "diagnostics":  {
+                                         "export_logs":  "Exportar Logs",
+                                         "refresh":  "Atualizar",
+                                         "send_report":  "Enviar Relatório",
+                                         "desc":  "Telemetria sem dados confidenciais.",
+                                         "severity":  "Gravidade",
+                                         "title":  "Diagnóstico do Sistema"
+                                     },
+                     "tabs":  {
+                                  "license":  "Licença \u0026 Plano",
+                                  "diagnostics":  "Diagnóstico \u0026 Logs",
+                                  "general":  "Geral \u0026 Scraping",
+                                  "appearance":  "Aparência \u0026 Temas"
+                              }
+                 },
+    "header":  {
+                   "tagline":  "Leads, verificação e campanhas — tudo em um só lugar"
+               },
+    "omini":  {
+                  "subtitle":  "Especialista em Crescimento e Automação",
+                  "prompt_gmap_matrix":  "Dicas para Google Maps Grid",
+                  "copied":  "Copiado!",
+                  "quick_prompts":  "Sugestões Rápidas",
+                  "title":  "Copiloto IA Omini",
+                  "send":  "Enviar",
+                  "upgrade_cta":  "Atualizar Licença para Desbloquear",
+                  "context":  "Contexto Atual",
+                  "locked_desc":  "Recurso exclusivo para licenças Pro e Omni Suite.",
+                  "locked_title":  "Copiloto IA Bloqueado",
+                  "prompt_whatsapp_warmup":  "Cronograma seguro de aquecimento",
+                  "prompt_cold_email":  "Criar cold email de alta conversão",
+                  "placeholder":  "Pergunte ao Omini sobre leads, emails e WhatsApp...",
+                  "copy":  "Copiar"
+              },
+    "nav":  {
+                "accounts":  "Contas",
+                "email_accounts":  "Contas de Email",
+                "email_suite":  "Suíte de Email (2)",
+                "overview":  "Visão Geral",
+                "whatsapp_suite":  "Suíte WhatsApp (13)",
+                "all_tools":  "Todas as Ferramentas (22)",
+                "dashboard":  "Painel",
+                "settings":  "Configurações",
+                "tool_suites":  "Suítes de Ferramentas",
+                "lead_scraping":  "Captura de Leads (7)",
+                "whatsapp_accounts":  "Contas de WhatsApp"
+            }
+}
