@@ -1,4 +1,4 @@
-﻿// src/components/ai/OminiChatWidget.jsx
+// src/components/ai/OminiChatWidget.jsx
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -391,8 +391,7 @@ export default function OminiChatWidget() {
                             color: "#ffffff",
                           }
                     }
-                  }
-                >
+                  >
                   {isAssistant ? (
                     <div>{formatMarkdown(m.content)}</div>
                   ) : (
