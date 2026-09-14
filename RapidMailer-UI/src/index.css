@@ -64,7 +64,7 @@ html[data-theme="nordic"] {
   color-scheme: dark;
 }
 
-/* ── Clean Studio ── High-contrast crisp paper light mode (Darker blacks, crisper grays, punchier colors) */
+/* ── Clean Studio ── High-contrast crisp paper light mode */
 html[data-theme="studio"] {
   --bg-app:          #f1f5f9;
   --bg-sidebar:      #ffffff;
@@ -156,8 +156,30 @@ html[data-theme="studio"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   BUTTONS & ACTION CTAS: White text across ALL themes without exception
+   ═══════════════════════════════════════════════════════════════════════════ */
+.grad-bg,
+.grad-bg *,
+button.grad-bg,
+button.grad-bg *,
+label.grad-bg,
+label.grad-bg *,
+a.grad-bg,
+a.grad-bg *,
+[class*="grad-bg"],
+[class*="grad-bg"] *,
+button[class*="bg-violet-"],
+button[class*="bg-violet-"] *,
+button[class*="bg-purple-"],
+button[class*="bg-purple-"] *,
+.grad-ring,
+.grad-ring * {
+  color: #ffffff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    LIGHT THEME ENHANCEMENTS (Clean Studio Mode ONLY)
-   Converts lingering dark-mode Tailwind classes into crisp high-contrast darks.
+   Converts content typography and subtle text into crisp high-contrast darks.
    Does NOT affect Carbon Slate, Warm Obsidian, or Nordic Cold.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -168,42 +190,29 @@ html[data-theme="studio"] .grad-text {
   color: transparent !important;
 }
 
-html[data-theme="studio"] h1:not(.grad-text):not(.text-transparent),
-html[data-theme="studio"] h2:not(.grad-text):not(.text-transparent),
-html[data-theme="studio"] h3:not(.grad-text):not(.text-transparent),
-html[data-theme="studio"] h4:not(.grad-text):not(.text-transparent) {
+html[data-theme="studio"] h1:not(.grad-text):not(.text-transparent):not(.grad-bg *),
+html[data-theme="studio"] h2:not(.grad-text):not(.text-transparent):not(.grad-bg *),
+html[data-theme="studio"] h3:not(.grad-text):not(.text-transparent):not(.grad-bg *),
+html[data-theme="studio"] h4:not(.grad-text):not(.text-transparent):not(.grad-bg *) {
   color: #090d16 !important;
 }
 
 /* Increase contrast for slate text in Studio light theme */
-html[data-theme="studio"] .text-slate-500 {
+html[data-theme="studio"] .text-slate-500:not(.grad-bg *) {
   color: #475569 !important; /* crisp slate-600 */
 }
 
-html[data-theme="studio"] .text-slate-400 {
+html[data-theme="studio"] .text-slate-400:not(.grad-bg *) {
   color: #334155 !important; /* dark readable slate-700 */
 }
 
-html[data-theme="studio"] .text-slate-300 {
+html[data-theme="studio"] .text-slate-300:not(.grad-bg *) {
   color: #1e293b !important; /* dark slate-800 */
 }
 
-html[data-theme="studio"] .text-slate-200,
-html[data-theme="studio"] .text-slate-100 {
+html[data-theme="studio"] .text-slate-200:not(.grad-bg *),
+html[data-theme="studio"] .text-slate-100:not(.grad-bg *) {
   color: #090d16 !important; /* true dark black */
-}
-
-/* Convert text-white on cards to dark black, unless inside a filled solid colored button/badge */
-html[data-theme="studio"] .glass-panel .text-white:not(.grad-bg *):not(.grad-ring *):not(button.grad-bg *):not(a.grad-bg *) {
-  color: #090d16 !important;
-}
-
-/* In Studio mode, make sure icons inside grad-bg or grad-ring stay bright white */
-html[data-theme="studio"] .grad-bg,
-html[data-theme="studio"] .grad-bg *,
-html[data-theme="studio"] .grad-ring,
-html[data-theme="studio"] .grad-ring * {
-  color: #ffffff;
 }
 
 /* ── Quill rich-text editor ─────────────────────────────────────────────── */
