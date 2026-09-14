@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import GradientBackdrop from "./components/ui/GradientBackdrop";
+import OminiChatWidget from "./components/ai/OminiChatWidget";
 import { APP_NAME } from "./constants/branding";
 import { initTheme } from "./utils/themeManager";
 
@@ -26,6 +27,7 @@ function App() {
           <Home />
         </main>
       </div>
+      <OminiChatWidget />
     </div>
   );
 }
