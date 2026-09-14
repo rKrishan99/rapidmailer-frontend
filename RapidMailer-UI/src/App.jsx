@@ -1,3 +1,4 @@
+﻿// App shell — top-level wrapper; no hardcoded background or text colors.
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -9,11 +10,14 @@ import { initTheme } from "./utils/themeManager";
 function App() {
   useEffect(() => {
     document.title = APP_NAME;
-    initTheme();
+    initTheme(); // Apply saved theme from localStorage on mount
   }, []);
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden text-slate-100">
+    <div
+      className="relative flex h-screen w-screen overflow-hidden"
+      style={{ color: "var(--text-primary)" }}
+    >
       <GradientBackdrop />
       <Sidebar />
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">

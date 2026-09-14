@@ -1,4 +1,4 @@
-import {
+﻿import {
   RiMailSendLine,
   RiRocket2Line,
   RiUserSearchLine,
@@ -36,7 +36,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col gap-10 p-6 md:p-10">
       <Card className="relative overflow-hidden p-8 md:p-12">
-        <div className="grad-bg absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-30 blur-3xl" />
+        <div className="grad-bg absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-25 blur-3xl" />
         <div className="relative flex flex-col-reverse items-center gap-10 lg:flex-row">
           <div className="flex flex-1 flex-col gap-6">
             <TypeAnimation
@@ -57,7 +57,7 @@ const Dashboard = () => {
               repeat={Infinity}
               className="grad-text text-3xl font-bold md:text-4xl"
             />
-            <p className="max-w-xl text-lg text-slate-400">
+            <p className="max-w-xl text-lg" style={{ color: "var(--text-secondary)" }}>
               Powerful tools to find leads, verify emails, and launch successful campaigns —
               without leaving one dashboard.
             </p>
@@ -81,8 +81,12 @@ const Dashboard = () => {
             <div className="grad-ring flex h-11 w-11 items-center justify-center rounded-xl">
               <Icon className="text-xl text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-white">{title}</h3>
-            <p className="text-sm text-slate-400">{description}</p>
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              {title}
+            </h3>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {description}
+            </p>
           </Card>
         ))}
       </div>

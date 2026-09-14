@@ -1,61 +1,62 @@
 ﻿// src/utils/themeManager.js
+// Theme IDs must match exactly what is set in index.css [data-theme="..."]
 
 export const THEMES = [
   {
-    id: "carbon-slate",
+    id: "carbon",
     name: "Carbon Slate",
     subtitle: "GitHub & Linear inspired cool dark slate",
     type: "dark",
     preview: {
       bg: "#0d1117",
-      surface: "#161b22",
+      surface: "#1c2128",
       border: "#30363d",
-      accent: "#38bdf8",
+      accent: "#2f81f7",
       text: "#e6edf3",
     },
-    description: "Ergonomic deep slate engineered for low eye fatigue during intensive scraping & campaign ops.",
+    description: "Ergonomic deep slate with precise contrast ratios — ideal for high-focus scraping and automation sessions.",
   },
   {
-    id: "warm-obsidian",
+    id: "obsidian",
     name: "Warm Obsidian",
-    subtitle: "Warm espresso dark reducing blue-light strain",
+    subtitle: "Warm espresso dark, blue-light fatigue reduced",
     type: "dark",
     preview: {
       bg: "#120e0d",
-      surface: "#1c1716",
-      border: "#3d322f",
+      surface: "#221c19",
+      border: "#3d312a",
       accent: "#f97316",
-      text: "#f5ece6",
+      text: "#f5ebe6",
     },
-    description: "Deep ember and warm charcoal hues that cut blue light exposure during night-time outreach.",
+    description: "Deep ember and warm charcoal hues engineered to cut blue light during late-night outreach campaigns.",
   },
   {
-    id: "nordic-cold",
+    id: "nordic",
     name: "Nordic Cold",
     subtitle: "Muted greyish-cyan arctic minimalism",
     type: "dark",
     preview: {
-      bg: "#0b1319",
-      surface: "#111c24",
-      border: "#203442",
-      accent: "#2dd4bf",
-      text: "#e1ecf2",
+      bg: "#0b131a",
+      surface: "#152432",
+      border: "#243f56",
+      accent: "#06b6d4",
+      text: "#ecf3f9",
     },
-    description: "Cool arctic frost tones with balanced contrast for high-clarity data scanning and filtering.",
+    description: "Cool arctic frost tones with balanced contrast for high-clarity data scanning and lead enrichment.",
   },
   {
-    id: "clean-studio",
+    id: "studio",
     name: "Clean Studio",
-    subtitle: "High-contrast warm paper off-white",
+    subtitle: "High-contrast warm paper off-white — Light Mode",
     type: "light",
     preview: {
-      bg: "#f8f9fa",
+      bg: "#f6f8fa",
       surface: "#ffffff",
-      border: "#e2e8f0",
-      accent: "#0284c7",
-      text: "#0f172a",
+      border: "#d0d7de",
+      accent: "#0969da",
+      text: "#1f2328",
     },
-    description: "Professional daytime studio theme with ink-black typography and clean borders.",
+    description: "Professional daytime studio theme with ink-black typography for client-facing demos and presentations.",
   },
 ];
 
@@ -63,23 +64,18 @@ const THEME_KEY = "omni_preferred_theme";
 
 export function getStoredTheme() {
   try {
-    return localStorage.getItem(THEME_KEY) || "carbon-slate";
+    return localStorage.getItem(THEME_KEY) || "carbon";
   } catch {
-    return "carbon-slate";
+    return "carbon";
   }
-}
-
-export function setTheme(themeId) {
-  try {
-    localStorage.setItem(THEME_KEY, themeId);
-  } catch {}
-  applyThemeToDocument(themeId);
 }
 
 export function applyThemeToDocument(themeId) {
   const root = document.documentElement;
+  // Remove any previously applied theme data-attribute
   root.setAttribute("data-theme", themeId);
-  if (themeId === "clean-studio") {
+
+  if (themeId === "studio") {
     root.classList.remove("dark");
     root.classList.add("light");
     root.style.colorScheme = "light";
@@ -90,6 +86,14 @@ export function applyThemeToDocument(themeId) {
   }
 }
 
+export function setTheme(themeId) {
+  try {
+    localStorage.setItem(THEME_KEY, themeId);
+  } catch {}
+  applyThemeToDocument(themeId);
+}
+
+/** Called once on app boot — reads localStorage, applies to <html> */
 export function initTheme() {
   const saved = getStoredTheme();
   applyThemeToDocument(saved);

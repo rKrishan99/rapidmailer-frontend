@@ -1,3 +1,4 @@
+﻿// Sidebar — all background and text colors driven by CSS design tokens.
 import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -18,23 +19,23 @@ const NAV_GROUPS = [
   {
     label: "Overview",
     items: [
-      { title: "Dashboard", path: "/dashbord", icon: RiDashboardLine },
-      { title: "All Tools (22)", path: "/tools", icon: RiAppsLine },
+      { title: "Dashboard",   path: "/dashbord", icon: RiDashboardLine },
+      { title: "All Tools (22)", path: "/tools",    icon: RiAppsLine },
     ],
   },
   {
     label: "Tool Suites",
     items: [
-      { title: "Lead Scraping (7)", path: "/tools?cat=scraping", icon: RiGlobalLine },
-      { title: "WhatsApp Suite (13)", path: "/tools?cat=whatsapp", icon: RiWhatsappLine },
-      { title: "Email Suite (2)", path: "/tools?cat=email", icon: RiMailCheckLine },
+      { title: "Lead Scraping (7)",    path: "/tools?cat=scraping",  icon: RiGlobalLine },
+      { title: "WhatsApp Suite (13)",  path: "/tools?cat=whatsapp",  icon: RiWhatsappLine },
+      { title: "Email Suite (2)",      path: "/tools?cat=email",     icon: RiMailCheckLine },
     ],
   },
   {
     label: "Accounts",
     items: [
       { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiWhatsappLine },
-      { title: "Email Accounts", path: "/email-accounts", icon: RiMailCheckLine },
+      { title: "Email Accounts",    path: "/email-accounts",   icon: RiMailCheckLine },
     ],
   },
 ];
@@ -46,13 +47,24 @@ const NavButton = ({ item, active, isExpand, onClick }) => {
       type="button"
       onClick={onClick}
       title={!isExpand ? item.title : undefined}
+      style={{
+        color: active ? "var(--text-primary)" : "var(--text-secondary)",
+        backgroundColor: active ? "var(--bg-surface-hover)" : "transparent",
+      }}
       className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-        active ? "bg-white/[0.08] text-white" : "text-slate-400 hover:bg-white/[0.05] hover:text-white"
-      } ${isExpand ? "" : "justify-center"}`}
+        isExpand ? "" : "justify-center"
+      }`}
+      onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = "var(--bg-surface-2)"; e.currentTarget.style.color = "var(--text-primary)"; }}}
+      onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--text-secondary)"; }}}
     >
-      {active && <span className="grad-bg absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full" />}
-      <Icon className={`text-lg ${active ? "text-accent-400" : ""}`} />
-      {isExpand && <span>{item.title}</span>}
+      {active && (
+        <span className="grad-bg absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full" />
+      )}
+      <Icon
+        className="text-lg shrink-0"
+        style={{ color: active ? "var(--accent-primary)" : "var(--text-muted)" }}
+      />
+      {isExpand && <span className="truncate">{item.title}</span>}
     </button>
   );
 };
@@ -66,30 +78,40 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`${
-        isExpand ? "w-[240px]" : "w-[76px]"
-      } glass-panel relative z-10 flex h-screen flex-col border-r border-white/10 bg-[#080b16]/80 transition-all duration-300`}
+      className={`${isExpand ? "w-[240px]" : "w-[76px]"} relative z-10 flex h-screen flex-col border-r transition-all duration-300`}
+      style={{
+        backgroundColor: "var(--bg-sidebar)",
+        borderColor: "var(--border-subtle)",
+      }}
     >
-      <div className="flex items-center gap-3 px-4 py-5">
+      {/* Logo row */}
+      <div className="flex items-center gap-3 px-4 py-5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <img
-          className={`${isExpand ? "w-[220px]" : "w-0"} overflow-hidden transition-all duration-300`}
+          className={`${isExpand ? "w-[200px]" : "w-0"} overflow-hidden transition-all duration-300`}
           src={images.logo}
           alt={APP_NAME}
         />
         <button
           type="button"
           onClick={() => setIsExpand(!isExpand)}
-          className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-white/[0.06] hover:text-white cursor-pointer"
+          className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition cursor-pointer"
+          style={{ color: "var(--text-secondary)" }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = "var(--bg-surface-2)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--text-secondary)"; }}
         >
           {isExpand ? <RiMenuFoldLine /> : <RiMenuUnfoldLine />}
         </button>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 pb-6">
+      {/* Nav groups */}
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 pb-6 pt-4">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
             {isExpand && (
-              <span className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+              <span
+                className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest"
+                style={{ color: "var(--text-muted)" }}
+              >
                 {group.label}
               </span>
             )}
@@ -115,7 +137,8 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="border-t border-white/10 px-3 py-3">
+      {/* Settings pinned at bottom */}
+      <div className="px-3 py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
         <NavButton
           item={SETTINGS_ITEM}
           isExpand={isExpand}

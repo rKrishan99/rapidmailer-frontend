@@ -18,21 +18,22 @@ import DiagnosticsView from "../components/settings/DiagnosticsView";
 import { APP_NAME } from "../constants/branding";
 
 const TABS = [
-  { id: "general", label: "General & Scraping", icon: RiSettings3Line },
-  { id: "appearance", label: "Appearance & Themes", icon: RiPaletteLine },
-  { id: "license", label: "License & Plan", icon: RiKey2Line },
-  { id: "diagnostics", label: "Diagnostics & Logs", icon: RiHeartPulseLine },
+  { id: "general",     label: "General & Scraping",    icon: RiSettings3Line },
+  { id: "appearance",  label: "Appearance & Themes",   icon: RiPaletteLine },
+  { id: "license",     label: "License & Plan",        icon: RiKey2Line },
+  { id: "diagnostics", label: "Diagnostics & Logs",    icon: RiHeartPulseLine },
 ];
 
 function Banner({ result }) {
   if (!result) return null;
   return (
     <div
-      className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm ${
-        result.ok
-          ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-          : "border-rose-400/30 bg-rose-400/10 text-rose-300"
-      }`}
+      className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
+      style={{
+        border: `1px solid ${result.ok ? "rgba(52,211,153,0.3)" : "rgba(248,113,113,0.3)"}`,
+        backgroundColor: result.ok ? "rgba(52,211,153,0.08)" : "rgba(248,113,113,0.08)",
+        color: result.ok ? "#34d399" : "#f87171",
+      }}
     >
       {result.ok ? <RiCheckLine /> : <RiErrorWarningLine />}
       {result.message}
@@ -51,9 +52,7 @@ const Settings = () => {
 
   useEffect(() => {
     if (settings && !form) {
-      setForm({
-        scraping: { puppeteerHeadless: settings.scraping.puppeteerHeadless },
-      });
+      setForm({ scraping: { puppeteerHeadless: settings.scraping.puppeteerHeadless } });
     }
   }, [settings, form]);
 
@@ -61,7 +60,7 @@ const Settings = () => {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="System" title="Settings" />
-        <SectionLoader label="Loading enterprise settings..." />
+        <SectionLoader label="Loading enterprise settings…" />
       </div>
     );
   }
@@ -70,25 +69,18 @@ const Settings = () => {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="System" title="Settings" />
-        <p className="text-rose-400">{loadError}</p>
+        <p style={{ color: "#f87171" }}>{loadError}</p>
       </div>
     );
   }
 
   const handleSaveGeneral = async () => {
     setSaveResult(null);
-    const payload = {
-      scraping: { ...form.scraping },
-      integrations: {},
-    };
+    const payload = { scraping: { ...form.scraping }, integrations: {} };
     if (editingApiKey) payload.integrations.googlePageSpeedApiKey = apiKeyDraft;
-
     const result = await saveSettings(payload);
     setSaveResult(result);
-    if (result.ok) {
-      setEditingApiKey(false);
-      setApiKeyDraft("");
-    }
+    if (result.ok) { setEditingApiKey(false); setApiKeyDraft(""); }
   };
 
   return (
@@ -100,7 +92,7 @@ const Settings = () => {
         actions={
           activeTab === "general" ? (
             <Button onClick={handleSaveGeneral} disabled={saving}>
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving…" : "Save Changes"}
             </Button>
           ) : null
         }
@@ -108,9 +100,8 @@ const Settings = () => {
 
       <Banner result={saveResult} />
 
-      {/* Main Settings Body: Left Vertical Navigation + Right Content Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Sub-Navigation Sidebar */}
+        {/* Vertical sub-nav */}
         <aside className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -120,20 +111,26 @@ const Settings = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition cursor-pointer shrink-0 text-left ${
-                  active
-                    ? "bg-white/[0.1] text-white shadow-sm ring-1 ring-white/10"
-                    : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
-                }`}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition cursor-pointer shrink-0 text-left"
+                style={{
+                  backgroundColor: active ? "var(--bg-surface)" : "transparent",
+                  color: active ? "var(--text-primary)" : "var(--text-secondary)",
+                  border: `1px solid ${active ? "var(--border-emphasis)" : "transparent"}`,
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = "var(--bg-surface-2)"; }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = "transparent"; }}
               >
-                <Icon className={`text-lg ${active ? "text-accent-400" : "text-slate-400"}`} />
+                <Icon
+                  className="text-lg shrink-0"
+                  style={{ color: active ? "var(--accent-primary)" : "var(--text-muted)" }}
+                />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </aside>
 
-        {/* Right Tab Content View */}
+        {/* Tab content */}
         <main className="lg:col-span-9 w-full">
           {activeTab === "general" && (
             <GeneralSettingsView
@@ -146,11 +143,8 @@ const Settings = () => {
               setApiKeyDraft={setApiKeyDraft}
             />
           )}
-
-          {activeTab === "appearance" && <AppearanceView />}
-
-          {activeTab === "license" && <LicenseView />}
-
+          {activeTab === "appearance"  && <AppearanceView />}
+          {activeTab === "license"     && <LicenseView />}
           {activeTab === "diagnostics" && <DiagnosticsView />}
         </main>
       </div>
