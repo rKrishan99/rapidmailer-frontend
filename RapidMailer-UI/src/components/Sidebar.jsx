@@ -15,7 +15,7 @@ import { images } from "../assets/assets";
 import { SidebarExpandContext } from "../context/SidebarExpandContext";
 import { APP_NAME } from "../constants/branding";
 
-const NAV_GROUPS = [
+const MAIN_NAV_GROUPS = [
   {
     label: "Overview",
     items: [
@@ -31,14 +31,14 @@ const NAV_GROUPS = [
       { title: "Email Suite (2)",      path: "/tools?cat=email",     icon: RiMailCheckLine },
     ],
   },
-  {
-    label: "Accounts",
-    items: [
-      { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiWhatsappLine },
-      { title: "Email Accounts",    path: "/email-accounts",   icon: RiMailCheckLine },
-    ],
-  },
 ];
+
+const ACCOUNT_ITEMS = [
+  { title: "WhatsApp Accounts", path: "/whatsapp-connect", icon: RiWhatsappLine },
+  { title: "Email Accounts",    path: "/email-accounts",   icon: RiMailCheckLine },
+];
+
+const SETTINGS_ITEM = { title: "Settings", path: "/settings", icon: RiSettings4Line };
 
 const NavButton = ({ item, active, isExpand, onClick }) => {
   const Icon = item.icon;
@@ -51,7 +51,7 @@ const NavButton = ({ item, active, isExpand, onClick }) => {
         color: active ? "var(--text-primary)" : "var(--text-secondary)",
         backgroundColor: active ? "var(--bg-surface-hover)" : "transparent",
       }}
-      className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
+      className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
         isExpand ? "" : "justify-center"
       }`}
       onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = "var(--bg-surface-2)"; e.currentTarget.style.color = "var(--text-primary)"; }}}
@@ -68,8 +68,6 @@ const NavButton = ({ item, active, isExpand, onClick }) => {
     </button>
   );
 };
-
-const SETTINGS_ITEM = { title: "Settings", path: "/settings", icon: RiSettings4Line };
 
 const Sidebar = () => {
   const { isExpand, setIsExpand } = useContext(SidebarExpandContext);
@@ -103,9 +101,9 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Nav groups */}
-      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 pb-6 pt-4">
-        {NAV_GROUPS.map((group) => (
+      {/* Main Nav groups (Overview & Tool Suites) */}
+      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 pb-4 pt-4">
+        {MAIN_NAV_GROUPS.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
             {isExpand && (
               <span
@@ -137,8 +135,29 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Settings pinned at bottom */}
-      <div className="px-3 py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+      {/* Accounts menu docked at bottom */}
+      <div className="w-full px-3 pt-3 pb-2 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+        {isExpand && (
+          <span
+            className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Accounts
+          </span>
+        )}
+        {ACCOUNT_ITEMS.map((item) => (
+          <NavButton
+            key={item.path}
+            item={item}
+            isExpand={isExpand}
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
+      </div>
+
+      {/* Settings pinned at very bottom */}
+      <div className="w-full px-3 py-2.5" style={{ borderTop: "1px solid var(--border-subtle)" }}>
         <NavButton
           item={SETTINGS_ITEM}
           isExpand={isExpand}
