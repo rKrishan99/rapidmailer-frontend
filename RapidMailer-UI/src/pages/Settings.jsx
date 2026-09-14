@@ -1,13 +1,28 @@
-import { useEffect, useState } from "react";
-import { RiGlobalLine, RiPlugLine, RiCheckLine, RiErrorWarningLine } from "react-icons/ri";
+﻿import { useEffect, useState } from "react";
+import {
+  RiSettings3Line,
+  RiPaletteLine,
+  RiKey2Line,
+  RiHeartPulseLine,
+  RiCheckLine,
+  RiErrorWarningLine,
+} from "react-icons/ri";
 import { useSettings } from "../context/SettingsContext";
-import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import Toggle from "../components/ui/Toggle";
-import SecretField from "../components/ui/SecretField";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
+import GeneralSettingsView from "../components/settings/GeneralSettingsView";
+import AppearanceView from "../components/settings/AppearanceView";
+import LicenseView from "../components/settings/LicenseView";
+import DiagnosticsView from "../components/settings/DiagnosticsView";
 import { APP_NAME } from "../constants/branding";
+
+const TABS = [
+  { id: "general", label: "General & Scraping", icon: RiSettings3Line },
+  { id: "appearance", label: "Appearance & Themes", icon: RiPaletteLine },
+  { id: "license", label: "License & Plan", icon: RiKey2Line },
+  { id: "diagnostics", label: "Diagnostics & Logs", icon: RiHeartPulseLine },
+];
 
 function Banner({ result }) {
   if (!result) return null;
@@ -28,6 +43,7 @@ function Banner({ result }) {
 const Settings = () => {
   const { settings, loading, loadError, saving, saveSettings } = useSettings();
 
+  const [activeTab, setActiveTab] = useState("general");
   const [form, setForm] = useState(null);
   const [editingApiKey, setEditingApiKey] = useState(false);
   const [apiKeyDraft, setApiKeyDraft] = useState("");
@@ -45,7 +61,7 @@ const Settings = () => {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="System" title="Settings" />
-        <SectionLoader label="Loading settings..." />
+        <SectionLoader label="Loading enterprise settings..." />
       </div>
     );
   }
@@ -59,7 +75,7 @@ const Settings = () => {
     );
   }
 
-  const handleSave = async () => {
+  const handleSaveGeneral = async () => {
     setSaveResult(null);
     const payload = {
       scraping: { ...form.scraping },
@@ -76,65 +92,68 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 md:p-10">
+    <div className="flex flex-col gap-8 p-6 md:p-10 max-w-7xl mx-auto w-full">
       <PageHeader
-        eyebrow="System"
+        eyebrow="System Hub"
         title="Settings"
-        description={`Configure how ${APP_NAME} scrapes the web and which integrations it uses. Sender accounts live under Email Accounts, and WhatsApp connections under WhatsApp Accounts.`}
+        description={`Manage scraping execution, visual ergonomic themes, device licensing, and 90-day diagnostic telemetry for ${APP_NAME}.`}
         actions={
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
+          activeTab === "general" ? (
+            <Button onClick={handleSaveGeneral} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          ) : null
         }
       />
 
       <Banner result={saveResult} />
 
-      <Card className="flex flex-col gap-5 p-6">
-        <div className="flex items-center gap-3">
-          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
-            <RiGlobalLine className="text-lg text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">Lead Scraping</h3>
-            <p className="text-sm text-slate-400">Controls how the Google Maps and Web Search scrapers run.</p>
-          </div>
-        </div>
+      {/* Main Settings Body: Left Vertical Navigation + Right Content Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Sub-Navigation Sidebar */}
+        <aside className="lg:col-span-3 flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition cursor-pointer shrink-0 text-left ${
+                  active
+                    ? "bg-white/[0.1] text-white shadow-sm ring-1 ring-white/10"
+                    : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
+                }`}
+              >
+                <Icon className={`text-lg ${active ? "text-accent-400" : "text-slate-400"}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </aside>
 
-        <Toggle
-          checked={form.scraping.puppeteerHeadless}
-          onChange={(v) => setForm((f) => ({ ...f, scraping: { puppeteerHeadless: v } }))}
-          label="Run headless"
-          description="Keep this on for servers without a display. Turn it off locally if you want to watch the scraper work."
-        />
-      </Card>
+        {/* Right Tab Content View */}
+        <main className="lg:col-span-9 w-full">
+          {activeTab === "general" && (
+            <GeneralSettingsView
+              form={form}
+              setForm={setForm}
+              settings={settings}
+              editingApiKey={editingApiKey}
+              setEditingApiKey={setEditingApiKey}
+              apiKeyDraft={apiKeyDraft}
+              setApiKeyDraft={setApiKeyDraft}
+            />
+          )}
 
-      <Card className="flex flex-col gap-5 p-6">
-        <div className="flex items-center gap-3">
-          <div className="grad-ring flex h-10 w-10 items-center justify-center rounded-xl">
-            <RiPlugLine className="text-lg text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">Integrations</h3>
-            <p className="text-sm text-slate-400">Optional API keys that unlock higher rate limits.</p>
-          </div>
-        </div>
+          {activeTab === "appearance" && <AppearanceView />}
 
-        <SecretField
-          label="Google PageSpeed API Key"
-          configured={editingApiKey ? false : settings.integrations.googlePageSpeedApiKeyConfigured}
-          editing={editingApiKey}
-          value={apiKeyDraft}
-          placeholder="Optional — raises Website Audit's rate limit"
-          onStartEdit={() => setEditingApiKey(true)}
-          onCancelEdit={() => {
-            setEditingApiKey(false);
-            setApiKeyDraft("");
-          }}
-          onChange={setApiKeyDraft}
-          onClear={() => setApiKeyDraft("")}
-        />
-      </Card>
+          {activeTab === "license" && <LicenseView />}
+
+          {activeTab === "diagnostics" && <DiagnosticsView />}
+        </main>
+      </div>
     </div>
   );
 };

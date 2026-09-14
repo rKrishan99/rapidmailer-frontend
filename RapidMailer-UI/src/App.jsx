@@ -4,10 +4,12 @@ import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import GradientBackdrop from "./components/ui/GradientBackdrop";
 import { APP_NAME } from "./constants/branding";
+import { initTheme } from "./utils/themeManager";
 
 function App() {
   useEffect(() => {
     document.title = APP_NAME;
+    initTheme();
   }, []);
 
   return (
