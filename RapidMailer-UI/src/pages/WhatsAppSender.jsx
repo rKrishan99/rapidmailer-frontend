@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   RiUpload2Line,
   RiDownloadLine,
@@ -10,16 +10,20 @@ import {
   RiShieldCheckLine,
   RiTimeLine,
   RiSparklingLine,
-  RiFileTextLine,
-  RiEdit2Line,
+  RiCheckLine,
+  RiAlertLine,
+  RiBarChartHorizontalLine,
+  RiAddLine,
+  RiDeleteBinLine,
 } from "react-icons/ri";
 import { useWhatsApp } from "../context/WhatsAppContext";
-import { parseLeadsCsv, downloadLeadsCsv, getRowPhone, getRowPhoneColumn } from "../utils/leadCsv";
+import { parseLeadsCsv, downloadLeadsCsv } from "../utils/leadCsv";
 import ShowWhatsAppResultsTable from "../components/ShowWhatsAppResultsTable";
 import WhatsAppAccountSelect from "../components/WhatsAppAccountSelect";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import { Input, Textarea } from "../components/ui/Field";
+import { Input } from "../components/ui/Field";
+import Select from "../components/ui/Select";
 import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
@@ -28,22 +32,58 @@ import Toggle from "../components/ui/Toggle";
 
 const MAX_BATCH = 500;
 
-/** Column names we treat as per-lead custom messages (case-insensitive) */
-const CSV_MSG_COLUMNS = ["message", "custom_message", "pitch"];
+const PHONE_COLUMN_CANDIDATES = [
+  "phone",
+  "Phone",
+  "phoneNumber",
+  "PhoneNumber",
+  "phone_number",
+  "mobile",
+  "Mobile",
+  "mobileNumber",
+  "contact",
+  "Contact",
+  "contactNumber",
+  "whatsapp",
+  "whatsAppNumber",
+  "whatsapp_number",
+  "tel",
+  "Tel",
+  "telephone",
+  "Telephone",
+];
 
-/** Detect which (if any) message column a CSV row has */
-function detectMessageColumn(row) {
-  if (!row) return null;
-  const keys = Object.keys(row);
-  return keys.find((k) => CSV_MSG_COLUMNS.includes(k.toLowerCase().replace(/\s/g, "_"))) || null;
+function detectPhoneColumn(columns = []) {
+  if (!columns || columns.length === 0) return "";
+  for (const candidate of PHONE_COLUMN_CANDIDATES) {
+    const found = columns.find((c) => c.toLowerCase() === candidate.toLowerCase());
+    if (found) return found;
+  }
+  const fuzzy = columns.find((c) => {
+    const lower = c.toLowerCase();
+    return lower.includes("phone") || lower.includes("mobile") || lower.includes("whatsapp") || lower.includes("tel");
+  });
+  return fuzzy || columns[0] || "";
 }
 
-// Helper to preview Spintax locally in the UI
+function extractDigits(val) {
+  return String(val || "").replace(/\D/g, "");
+}
+
+// Helper to preview Spintax and {{variable}} replacement locally in the UI
 function previewSpintaxAndVars(text, sampleRow = {}) {
   if (!text) return "";
   let rendered = text.replace(/\{\{\s*([\w.\s-]+?)\s*\}\}/g, (match, field) => {
-    const val = sampleRow[field.trim()];
-    return val !== undefined && val !== null ? String(val) : match;
+    const trimmed = field.trim();
+    if (sampleRow[trimmed] !== undefined && sampleRow[trimmed] !== null && String(sampleRow[trimmed]).trim() !== "") {
+      return String(sampleRow[trimmed]);
+    }
+    const norm = trimmed.toLowerCase().replace(/[\s_-]+/g, "");
+    const found = Object.keys(sampleRow).find((k) => k.toLowerCase().replace(/[\s_-]+/g, "") === norm);
+    if (found && sampleRow[found] !== undefined && sampleRow[found] !== null && String(sampleRow[found]).trim() !== "") {
+      return String(sampleRow[found]);
+    }
+    return match;
   });
   // Sample spintax resolution (pick first option)
   const spintaxRegex = /\{([^{}]+)\}/g;
@@ -58,19 +98,26 @@ const WhatsAppSender = () => {
 
   const [accountId, setAccountId] = useState("");
   const [fileName, setFileName] = useState("");
-  const [rows, setRows] = useState([]);
-  const [skippedCount, setSkippedCount] = useState(0);
-  const [detectedColumn, setDetectedColumn] = useState(null);
+  const [rawRows, setRawRows] = useState([]);
+  const [csvColumns, setCsvColumns] = useState([]);
+  const [phoneColumn, setPhoneColumn] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Message mode: "template" (Mode A) | "custom_csv" (Mode B)
-  const [messageMode, setMessageMode] = useState("template");
-  const [detectedMsgColumn, setDetectedMsgColumn] = useState(null); // column name if found in CSV
-
-  // Message Configuration (Free-form, no template approvals!)
+  // Message Configuration
   const [messageText, setMessageText] = useState(
     "{Hi|Hello|Hey} {{name}},\n\nI noticed your business {{website}} and wanted to reach out regarding our new solution. Would you have 5 minutes this week?\n\nBest regards,"
   );
+  const textareaRef = useRef(null);
+
+  // Interactive WhatsApp Poll state
+  const [enablePoll, setEnablePoll] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState("Would you be interested in a 5-min demo of our solution?");
+  const [pollOptions, setPollOptions] = useState([
+    "Yes, please send details 🚀",
+    "Schedule a quick call 📞",
+    "Not right now 👋",
+  ]);
+  const [pollMultipleChoice, setPollMultipleChoice] = useState(false);
 
   // Media attachment
   const [headerType, setHeaderType] = useState("none"); // none | image | video
@@ -88,11 +135,39 @@ const WhatsAppSender = () => {
 
   const [submitError, setSubmitError] = useState(null);
 
-  const headers = useMemo(() => (rows[0] ? Object.keys(rows[0]) : []), [rows]);
-  const samplePreview = useMemo(
-    () => previewSpintaxAndVars(messageText, rows[0] || { name: "Alex", website: "acme.com" }),
-    [messageText, rows]
-  );
+  // Compute valid rows based on the selected phoneColumn
+  const { validRows, skippedCount } = useMemo(() => {
+    if (!rawRows.length || !phoneColumn) {
+      return { validRows: [], skippedCount: 0 };
+    }
+    const valid = [];
+    let skipped = 0;
+    for (const r of rawRows) {
+      const val = r[phoneColumn];
+      const digits = extractDigits(val);
+      if (digits.length >= 7) {
+        valid.push(r);
+      } else {
+        skipped++;
+      }
+    }
+    return { validRows: valid, skippedCount: skipped };
+  }, [rawRows, phoneColumn]);
+
+  // Sample row for preview
+  const sampleRow = useMemo(() => {
+    if (validRows[0]) return validRows[0];
+    if (rawRows[0]) return rawRows[0];
+    return { name: "Alex", website: "acme.com", city: "Colombo" };
+  }, [validRows, rawRows]);
+
+  const samplePreview = useMemo(() => {
+    return previewSpintaxAndVars(messageText, sampleRow);
+  }, [messageText, sampleRow]);
+
+  const samplePollQuestionPreview = useMemo(() => {
+    return previewSpintaxAndVars(pollQuestion, sampleRow);
+  }, [pollQuestion, sampleRow]);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -102,25 +177,57 @@ const WhatsAppSender = () => {
     const parsed = await parseLeadsCsv(file);
     if (parsed.length === 0) {
       setShowAlert(true);
-      setRows([]);
+      setRawRows([]);
+      setCsvColumns([]);
+      setPhoneColumn("");
       return;
     }
     setShowAlert(false);
 
-    const withPhone = parsed.filter((row) => getRowPhone(row));
-    setSkippedCount(parsed.length - withPhone.length);
-    setDetectedColumn(withPhone[0] ? getRowPhoneColumn(withPhone[0]) : null);
-    setRows(withPhone);
-    event.target.value = "";
+    const cols = Object.keys(parsed[0]);
+    const detected = detectPhoneColumn(cols);
 
-    // Auto-detect message column and switch to Mode B if found
-    const msgCol = detectMessageColumn(withPhone[0]);
-    setDetectedMsgColumn(msgCol);
-    if (msgCol) {
-      setMessageMode("custom_csv");
-    } else {
-      setMessageMode("template");
+    setRawRows(parsed);
+    setCsvColumns(cols);
+    setPhoneColumn(detected);
+    event.target.value = "";
+  };
+
+  // Inserts {{variable}} tag at current cursor position in textarea
+  const insertVariable = (colName) => {
+    const tag = `{{${colName}}}`;
+    const el = textareaRef.current;
+    if (!el) {
+      setMessageText((prev) => `${prev} ${tag}`);
+      return;
     }
+    const start = el.selectionStart ?? messageText.length;
+    const end = el.selectionEnd ?? messageText.length;
+    const nextText = messageText.substring(0, start) + tag + messageText.substring(end);
+    setMessageText(nextText);
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + tag.length, start + tag.length);
+    }, 0);
+  };
+
+  // Poll option helpers
+  const handleAddPollOption = () => {
+    if (pollOptions.length >= 12) return;
+    setPollOptions((prev) => [...prev, `Option ${prev.length + 1}`]);
+  };
+
+  const handleUpdatePollOption = (idx, value) => {
+    setPollOptions((prev) => {
+      const next = [...prev];
+      next[idx] = value;
+      return next;
+    });
+  };
+
+  const handleRemovePollOption = (idx) => {
+    if (pollOptions.length <= 2) return;
+    setPollOptions((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSend = async () => {
@@ -130,14 +237,25 @@ const WhatsAppSender = () => {
       setSubmitError("Select which linked WhatsApp account to send from.");
       return;
     }
-    if (rows.length === 0) {
-      setSubmitError("Upload a CSV with a phone number column first.");
+    if (validRows.length === 0) {
+      setSubmitError("Upload a CSV and select a column containing valid phone numbers.");
       return;
     }
-    if (messageMode !== "custom_csv" && !messageText.trim()) {
-      setSubmitError("Please enter a message to send.");
+
+    const hasText = Boolean(messageText && messageText.trim());
+    const validPollOptions = pollOptions.map((o) => o.trim()).filter(Boolean);
+    const hasValidPoll = enablePoll && pollQuestion.trim() && validPollOptions.length >= 2;
+
+    if (!hasText && !hasValidPoll) {
+      setSubmitError("Please enter a message or configure a WhatsApp poll with a question and at least 2 options.");
       return;
     }
+
+    if (enablePoll && (!pollQuestion.trim() || validPollOptions.length < 2)) {
+      setSubmitError("Please provide a poll question and at least 2 non-empty options.");
+      return;
+    }
+
     if (headerType !== "none") {
       if (headerSource === "fixed" && !headerMediaUrl.trim()) {
         setSubmitError(`Please enter a valid ${headerType} URL.`);
@@ -149,14 +267,21 @@ const WhatsAppSender = () => {
       }
     }
 
-    const recipients = rows.slice(0, MAX_BATCH).map((row) => ({
+    const recipients = validRows.slice(0, MAX_BATCH).map((row) => ({
       ...row,
-      phone: getRowPhone(row),
+      phone: String(row[phoneColumn] || "").trim(),
     }));
 
     const message = {
-      mode: messageMode,
-      text: messageMode === "template" ? messageText : undefined,
+      mode: "template",
+      text: hasText ? messageText : undefined,
+      poll: hasValidPoll
+        ? {
+            question: pollQuestion.trim(),
+            options: validPollOptions,
+            selectableCount: pollMultipleChoice ? 0 : 1,
+          }
+        : null,
       media:
         headerType !== "none"
           ? {
@@ -184,14 +309,15 @@ const WhatsAppSender = () => {
   };
 
   const handleExport = () => {
-    downloadLeadsCsv(results, `whatsapp_campaign_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    if (!results || results.length === 0) return;
+    downloadLeadsCsv(results, `whatsapp_campaign_results_${new Date().toISOString().slice(0, 10)}.csv`);
   };
 
   if (loading) {
     return (
       <div className="flex flex-col gap-8 p-6 md:p-10">
         <PageHeader eyebrow="WhatsApp Tools" title="WhatsApp Bulk Sender" />
-        <SectionLoader label="Loading connected WhatsApp accounts..." />
+        <SectionLoader label="Checking linked WhatsApp accounts..." />
       </div>
     );
   }
@@ -201,7 +327,7 @@ const WhatsAppSender = () => {
       <PageHeader
         eyebrow="QR-Linked · Anti-Ban Protected Dispatcher"
         title="WhatsApp Bulk Sender"
-        description="Dispatch personalized WhatsApp messages directly from your linked phone without Meta template restrictions. Built-in human delay emulation, batch pacing, typing presence simulation, and Spintax variability protect your account from spam filters."
+        description="Dispatch personalized WhatsApp messages and native interactive polls directly from your linked phone without Meta template restrictions. Built-in human delay emulation, batch pacing, typing presence simulation, and Spintax variability protect your account from spam filters."
       />
 
       {/* Account Selector */}
@@ -209,39 +335,77 @@ const WhatsAppSender = () => {
         <WhatsAppAccountSelect value={accountId} onChange={setAccountId} />
       </Card>
 
-      {/* CSV Upload */}
-      <Card className="flex flex-col gap-4 p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <label
-            htmlFor="whatsapp-bulk-csv-input"
-            className="grad-bg inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 hover:brightness-110"
-          >
-            <RiUpload2Line />
-            Choose Leads CSV
-          </label>
-          <input
-            id="whatsapp-bulk-csv-input"
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleFileUpload}
-          />
-          {fileName && <span className="text-sm font-medium text-slate-300">{fileName}</span>}
+      {/* CSV Upload & Column Mapping */}
+      <Card className="flex flex-col gap-5 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="whatsapp-bulk-csv-input"
+              className="grad-bg inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 hover:brightness-110"
+            >
+              <RiUpload2Line />
+              Choose Leads CSV
+            </label>
+            <input
+              id="whatsapp-bulk-csv-input"
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            {fileName && (
+              <span className="text-sm font-medium text-slate-300 bg-white/[0.05] border border-white/10 px-3 py-1.5 rounded-lg">
+                {fileName}
+              </span>
+            )}
+          </div>
+          {rawRows.length > 0 && (
+            <span className="text-xs text-slate-400">
+              {rawRows.length} total rows in CSV
+            </span>
+          )}
         </div>
-        {rows.length > 0 && (
-          <p className="text-xs text-slate-400">
-            Loaded <strong className="text-slate-200">{rows.length}</strong> recipients
-            {detectedColumn ? (
-              <>
-                {" "}
-                (phone numbers found in <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-violet-300">{detectedColumn}</code>)
-              </>
-            ) : null}
-            {skippedCount > 0 ? ` · ${skippedCount} rows without valid phone numbers skipped.` : "."}
-            {rows.length > MAX_BATCH ? ` Only first ${MAX_BATCH} will be dispatched in this run.` : ""}
-          </p>
-        )}
+
         {showAlert && <span className="text-sm text-rose-400">The uploaded CSV appears to be empty.</span>}
+
+        {/* Column Mapping Section */}
+        {csvColumns.length > 0 && (
+          <div className="rounded-xl border border-violet-500/20 bg-violet-500/[0.03] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-xs font-semibold text-violet-300 uppercase tracking-wider">
+                Phone Number Column
+              </label>
+              <p className="text-xs text-slate-400">
+                Select which column holds the recipient WhatsApp phone numbers:
+              </p>
+              <div className="mt-1 w-full sm:w-72">
+                <Select
+                  value={phoneColumn}
+                  onChange={setPhoneColumn}
+                  options={csvColumns}
+                  placeholder="Select phone column"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1 sm:text-right border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0">
+              <div className="flex items-center sm:justify-end gap-2 text-sm font-semibold text-emerald-400">
+                <RiCheckLine className="text-lg" />
+                <span>{validRows.length} valid phone numbers found</span>
+              </div>
+              {skippedCount > 0 && (
+                <p className="text-xs text-amber-400/80">
+                  {skippedCount} rows skipped (no valid digits in {phoneColumn})
+                </p>
+              )}
+              {validRows.length > MAX_BATCH && (
+                <p className="text-xs text-violet-300">
+                  Max batch cap: first {MAX_BATCH} will be sent.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Message Composer */}
@@ -254,114 +418,211 @@ const WhatsAppSender = () => {
             <div>
               <h3 className="font-semibold text-white">Compose Message</h3>
               <p className="text-xs text-slate-400">
-                Full Spintax <code>{`{Hi|Hello|Hey}`}</code> and personalization tags <code>{`{{name}}`}</code> supported.
+                Type your message below. Use <code>{`{{column_name}}`}</code> tags to personalize each message with CSV data.
               </p>
             </div>
           </div>
           <Badge tone="brand">No Template Approval Required</Badge>
         </div>
 
-        {/* Mode A / Mode B toggle */}
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1 w-fit">
-          <button
-            type="button"
-            onClick={() => setMessageMode("template")}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-              messageMode === "template" ? "grad-bg text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <RiEdit2Line />
-            Single Template
-          </button>
-          <button
-            type="button"
-            onClick={() => setMessageMode("custom_csv")}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-              messageMode === "custom_csv" ? "grad-bg text-white" : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <RiFileTextLine />
-            1-to-1 CSV Messages
-          </button>
-        </div>
-
-        {/* Mode B: custom_csv banner */}
-        {messageMode === "custom_csv" && (
-          <div className="flex items-start gap-3 rounded-xl border border-violet-500/30 bg-violet-500/[0.06] px-4 py-3">
-            <RiInformationLine className="mt-0.5 shrink-0 text-lg text-violet-400" />
-            <div className="text-sm">
-              <p className="font-medium text-violet-200">1-to-1 Custom Message Mode active</p>
-              <p className="mt-0.5 text-xs text-slate-400">
-                Each recipient receives their own personalized message from the{" "}
-                <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-violet-300">
-                  {detectedMsgColumn || "message"}
-                </code>{" "}
-                column in your CSV. Spintax <code>{"{A|B}"}</code> within each cell is still resolved.
-                {detectedMsgColumn
-                  ? ` Column "${detectedMsgColumn}" was auto-detected in your CSV.`
-                  : " Upload a CSV that has a message / custom_message / pitch column."}
-              </p>
+        {/* Clickable Column Variables */}
+        {csvColumns.length > 0 && (
+          <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">
+                Available CSV Variables (click to insert):
+              </span>
+              <span className="text-[11px] text-slate-500">
+                Inserts at cursor position
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {csvColumns.map((col) => (
+                <button
+                  key={col}
+                  type="button"
+                  onClick={() => insertVariable(col)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-300 hover:bg-violet-500/20 hover:border-violet-500/40 transition-colors"
+                >
+                  + {`{{${col}}}`}
+                </button>
+              ))}
+              {/* Quick Spintax helper button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const tag = "{Hi|Hello|Hey}";
+                  const el = textareaRef.current;
+                  if (!el) {
+                    setMessageText((prev) => `${prev} ${tag}`);
+                    return;
+                  }
+                  const start = el.selectionStart ?? messageText.length;
+                  const end = el.selectionEnd ?? messageText.length;
+                  setMessageText(messageText.substring(0, start) + tag + messageText.substring(end));
+                }}
+                className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20 transition-colors ml-auto"
+                title="Inserts Spintax variation"
+              >
+                + Spintax {`{Hi|Hello|Hey}`}
+              </button>
             </div>
           </div>
         )}
 
-        {/* Tag helper pills — only useful in template mode */}
-        {messageMode === "template" && headers.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-400">Available variables:</span>
-            {headers.slice(0, 8).map((h) => (
-              <button
-                key={h}
-                type="button"
-                onClick={() => setMessageText((prev) => `${prev} {{${h}}}`)}
-                className="rounded-lg bg-white/[0.06] px-2.5 py-1 text-xs text-violet-300 hover:bg-white/10"
-              >
-                + {`{{${h}}}`}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Textarea — disabled and greyed in Mode B */}
-        <div className={messageMode === "custom_csv" ? "opacity-40 pointer-events-none select-none" : ""}>
-          <Textarea
-            label={messageMode === "custom_csv" ? "Message Body (disabled in 1-to-1 mode)" : "Message Body"}
+        {/* Textarea */}
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            Message Body (Optional if Poll is attached)
+          </label>
+          <textarea
+            ref={textareaRef}
             rows={5}
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
-            placeholder="Write your message here. Use {Option1|Option2} for variation..."
+            placeholder="Write your message here. E.g. Hello {{name}}, I noticed your business {{website}}..."
+            className="w-full rounded-xl bg-white/[0.05] border border-white/10 p-4 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus:border-violet-400 transition-colors resize-y"
           />
         </div>
 
-        {/* Sample Preview — only in template mode */}
-        {messageMode === "template" && (
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <RiSparklingLine className="text-violet-400" />
-              Sample Preview (Row #1)
-            </span>
-            <p className="text-sm text-slate-200 whitespace-pre-wrap font-sans bg-slate-900/60 p-3 rounded-lg border border-white/5">
-              {samplePreview}
-            </p>
+        {/* Interactive WhatsApp Poll Section */}
+        <div className="rounded-xl border border-violet-500/30 bg-violet-500/[0.04] p-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/20 text-violet-300">
+                <RiBarChartHorizontalLine className="text-xl" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-white text-sm">Interactive WhatsApp Poll</h4>
+                <p className="text-xs text-slate-400">
+                  Deliver a native WhatsApp poll in the chat for one-tap lead responses.
+                </p>
+              </div>
+            </div>
+            <Toggle checked={enablePoll} onChange={setEnablePoll} label="" />
           </div>
-        )}
 
-        {/* Mode B sample: show the actual CSV message value for row 1 */}
-        {messageMode === "custom_csv" && rows[0] && (
-          <div className="rounded-xl border border-violet-500/20 bg-violet-500/[0.03] p-4 flex flex-col gap-1.5">
+          {enablePoll && (
+            <div className="flex flex-col gap-4 pt-2 border-t border-white/10">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Poll Question / Title (supports <code>{`{{name}}`}</code>)
+                </label>
+                <Input
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  placeholder="e.g. Would you be interested in a 5-min demo?"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-slate-300">
+                  Poll Options (2 to 12 choices):
+                </label>
+                {pollOptions.map((opt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-xs font-bold text-slate-400">
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1">
+                      <Input
+                        value={opt}
+                        onChange={(e) => handleUpdatePollOption(idx, e.target.value)}
+                        placeholder={`Option ${idx + 1}`}
+                      />
+                    </div>
+                    {pollOptions.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePollOption(idx)}
+                        className="p-2 text-slate-400 hover:text-rose-400 transition-colors"
+                        title="Remove option"
+                      >
+                        <RiDeleteBinLine className="text-base" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {pollOptions.length < 12 && (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={handleAddPollOption}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 hover:text-violet-200 transition-colors"
+                    >
+                      <RiAddLine />
+                      Add Another Option ({pollOptions.length}/12)
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-slate-300">Allow Multiple Answers</span>
+                  <span className="text-[11px] text-slate-500">
+                    {pollMultipleChoice ? "Recipients can pick multiple choices" : "Recipients can only pick one single choice"}
+                  </span>
+                </div>
+                <Toggle checked={pollMultipleChoice} onChange={setPollMultipleChoice} label="" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live Personalization Preview (Lead #1) */}
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <RiSparklingLine className="text-violet-400" />
-              Row #1 — CSV Message Preview
+              <RiSparklingLine className="text-violet-400 text-sm" />
+              Live Personalization Preview (Lead #1
+              {sampleRow[phoneColumn] ? `: +${sampleRow[phoneColumn]}` : ""})
             </span>
-            <p className="text-sm text-slate-200 whitespace-pre-wrap font-sans bg-slate-900/60 p-3 rounded-lg border border-white/5">
-              {rows[0][detectedMsgColumn] ||
-                rows[0]["message"] ||
-                rows[0]["custom_message"] ||
-                rows[0]["pitch"] ||
-                <span className="text-rose-400 italic">No message column found in row #1</span>}
-            </p>
+            <span className="text-[11px] text-slate-500">
+              Real-time variable &amp; Spintax replacement
+            </span>
           </div>
-        )}
+
+          <div className="flex flex-col gap-3 bg-[#0c0e18] p-4 rounded-xl border border-white/5">
+            {/* Message text preview */}
+            {samplePreview ? (
+              <p className="text-sm text-slate-200 whitespace-pre-wrap font-sans leading-relaxed">
+                {samplePreview}
+              </p>
+            ) : null}
+
+            {/* Poll visual preview */}
+            {enablePoll && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3.5 flex flex-col gap-2.5 max-w-sm">
+                <div className="flex items-center gap-2">
+                  <RiBarChartHorizontalLine className="text-emerald-400 text-sm shrink-0" />
+                  <span className="text-xs font-bold text-white">
+                    {samplePollQuestionPreview || "Poll Question"}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {pollOptions.map((opt, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-slate-300"
+                    >
+                      <span className={`h-3 w-3 ${pollMultipleChoice ? "rounded-sm" : "rounded-full"} border border-slate-500 shrink-0`} />
+                      <span className="truncate">{previewSpintaxAndVars(opt, sampleRow) || `Option ${i + 1}`}</span>
+                    </div>
+                  ))}
+                </div>
+                <span className="text-[10px] text-slate-400">
+                  {pollMultipleChoice ? "Select one or more" : "Select one"} · WhatsApp Interactive Poll
+                </span>
+              </div>
+            )}
+
+            {!samplePreview && !enablePoll && (
+              <span className="text-slate-500 italic text-sm">Type a message or enable poll above to see preview...</span>
+            )}
+          </div>
+        </div>
 
         {/* Optional Media Header */}
         <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
@@ -422,18 +683,14 @@ const WhatsAppSender = () => {
                   onChange={(e) => setHeaderMediaUrl(e.target.value)}
                 />
               ) : (
-                <select
-                  value={headerMediaUrlField}
-                  onChange={(e) => setHeaderMediaUrlField(e.target.value)}
-                  className="rounded-xl bg-white/[0.05] border border-white/10 px-4 py-2.5 text-sm text-slate-100 outline-none"
-                >
-                  <option value="">— Select CSV column —</option>
-                  {headers.map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
+                <div className="w-full">
+                  <Select
+                    value={headerMediaUrlField}
+                    onChange={setHeaderMediaUrlField}
+                    options={csvColumns}
+                    placeholder="— Select CSV column —"
+                  />
+                </div>
               )}
             </div>
           )}
@@ -500,8 +757,8 @@ const WhatsAppSender = () => {
       {sendError && <p className="text-sm text-rose-400">{sendError}</p>}
 
       <div className="flex justify-end">
-        <Button onClick={handleSend} disabled={sending || rows.length === 0 || !accountId}>
-          {sending ? "Sending..." : `Send to ${Math.min(rows.length, MAX_BATCH) || 0} Recipients`}
+        <Button onClick={handleSend} disabled={sending || validRows.length === 0 || !accountId}>
+          {sending ? "Sending..." : `Send to ${Math.min(validRows.length, MAX_BATCH) || 0} Recipients`}
         </Button>
       </div>
 
@@ -525,7 +782,7 @@ const WhatsAppSender = () => {
         <EmptyState
           icon={RiWhatsappLine}
           title="No campaigns sent yet"
-          description="Upload a CSV and click send to monitor live delivery progress."
+          description="Upload a CSV, select your phone column, and click send to monitor live delivery progress."
         />
       )}
     </div>
