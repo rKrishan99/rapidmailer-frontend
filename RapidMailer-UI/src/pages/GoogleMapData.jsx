@@ -10,6 +10,7 @@ import PageHeader from "../components/ui/PageHeader";
 import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
 import { hasRealWebsite, downloadLeadsCsv } from "../utils/leadCsv";
+import ExportContactsMenu from "../components/ui/ExportContactsMenu";
 
 const GoogleMapData = () => {
   const { googleMapData, loading, fetchGoogleMapData, error } = useContext(GoogleMapDataContext);
@@ -102,6 +103,7 @@ const GoogleMapData = () => {
                 <RiDownloadLine />
                 No Website ({withoutWebsite.length})
               </Button>
+              <ExportContactsMenu rows={results} filenamePrefix="maps" />
             </div>
           </Card>
         </div>

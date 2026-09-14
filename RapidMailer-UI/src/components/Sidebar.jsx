@@ -3,17 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   RiDashboardLine,
   RiAppsLine,
-  RiMapPin2Line,
   RiGlobalLine,
-  RiSearchLine,
-  RiShareForwardLine,
-  RiMailCheckLine,
-  RiSendPlaneLine,
-  RiCodeSSlashLine,
-  RiShieldCheckLine,
   RiWhatsappLine,
-  RiLinksLine,
-  RiFilterLine,
+  RiMailCheckLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiSettings4Line,
@@ -27,7 +19,15 @@ const NAV_GROUPS = [
     label: "Overview",
     items: [
       { title: "Dashboard", path: "/dashbord", icon: RiDashboardLine },
-      { title: "All Tools", path: "/tools", icon: RiAppsLine },
+      { title: "All Tools (22)", path: "/tools", icon: RiAppsLine },
+    ],
+  },
+  {
+    label: "Tool Suites",
+    items: [
+      { title: "Lead Scraping (7)", path: "/tools?cat=scraping", icon: RiGlobalLine },
+      { title: "WhatsApp Suite (13)", path: "/tools?cat=whatsapp", icon: RiWhatsappLine },
+      { title: "Email Suite (2)", path: "/tools?cat=email", icon: RiMailCheckLine },
     ],
   },
   {
@@ -93,15 +93,24 @@ const Sidebar = () => {
                 {group.label}
               </span>
             )}
-            {group.items.map((item) => (
-              <NavButton
-                key={item.path}
-                item={item}
-                isExpand={isExpand}
-                active={location.pathname === item.path}
-                onClick={() => navigate(item.path)}
-              />
-            ))}
+            {group.items.map((item) => {
+              const currentFull = location.pathname + location.search;
+              const isActive = item.path.includes("?")
+                ? currentFull === item.path
+                : item.path === "/tools"
+                ? location.pathname === "/tools" && (!location.search || location.search === "?cat=all")
+                : location.pathname === item.path;
+
+              return (
+                <NavButton
+                  key={item.path}
+                  item={item}
+                  isExpand={isExpand}
+                  active={isActive}
+                  onClick={() => navigate(item.path)}
+                />
+              );
+            })}
           </div>
         ))}
       </nav>

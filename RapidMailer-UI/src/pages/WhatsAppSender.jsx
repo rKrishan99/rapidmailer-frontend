@@ -29,6 +29,7 @@ import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
 import Badge from "../components/ui/Badge";
 import Toggle from "../components/ui/Toggle";
+import ExportContactsMenu from "../components/ui/ExportContactsMenu";
 
 const MAX_BATCH = 500;
 
@@ -403,6 +404,9 @@ const WhatsAppSender = () => {
                   Max batch cap: first {MAX_BATCH} will be sent.
                 </p>
               )}
+              <div className="mt-2 flex sm:justify-end">
+                <ExportContactsMenu rows={validRows} filenamePrefix="wa_audience" />
+              </div>
             </div>
           </div>
         )}
@@ -771,10 +775,13 @@ const WhatsAppSender = () => {
               <Badge tone="good">{results.filter((r) => r.status === "sent").length} sent</Badge>
               <Badge tone="bad">{results.filter((r) => r.status === "failed").length} failed</Badge>
             </div>
-            <Button onClick={handleExport} variant="secondary">
-              <RiDownloadLine />
-              Export Results CSV
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleExport} variant="secondary">
+                <RiDownloadLine />
+                Export Results CSV
+              </Button>
+              <ExportContactsMenu rows={results} filenamePrefix="wa_campaign" />
+            </div>
           </div>
           <ShowWhatsAppResultsTable data={results} />
         </div>

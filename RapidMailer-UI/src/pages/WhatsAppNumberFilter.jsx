@@ -20,6 +20,7 @@ import SectionLoader from "../components/ui/SectionLoader";
 import EmptyState from "../components/ui/EmptyState";
 import Badge from "../components/ui/Badge";
 import DataTable from "../components/ui/DataTable";
+import ExportContactsMenu from "../components/ui/ExportContactsMenu";
 
 const MAX_BATCH = 500;
 
@@ -346,6 +347,7 @@ const WhatsAppNumberFilter = () => {
                 <RiDownloadLine />
                 Export Invalid CSV ({invalidLeads.length})
               </Button>
+              <ExportContactsMenu rows={validLeads} filenamePrefix="wa_valid" />
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import Dashboard from "./Dashboard";
 import Tools from "./Tools";
 import GoogleMapData from "./GoogleMapData";
+import GoogleMapGrid from "./GoogleMapGrid";
 import WebData from "./WebData";
 import EmailFinder from "./EmailFinder";
 import SocialEnricher from "./SocialEnricher";
@@ -16,6 +17,17 @@ import WebsiteAudit from "./WebsiteAudit";
 import WhatsAppConnect from "./WhatsAppConnect";
 import WhatsAppSender from "./WhatsAppSender";
 import WhatsAppNumberFilter from "./WhatsAppNumberFilter";
+import WhatsAppGroupGrabber from "./WhatsAppGroupGrabber";
+import WhatsAppPollAnalytics from "./WhatsAppPollAnalytics";
+import WhatsAppAutoResponder from "./WhatsAppAutoResponder";
+import WhatsAppChatBackup from "./WhatsAppChatBackup";
+import WhatsAppWarmer from "./WhatsAppWarmer";
+import WhatsAppActiveMembers from "./WhatsAppActiveMembers";
+import WhatsAppWebLinks from "./WhatsAppWebLinks";
+import WhatsAppGroupFinder from "./WhatsAppGroupFinder";
+import WhatsAppGroupJoiner from "./WhatsAppGroupJoiner";
+import WhatsAppGroupAdder from "./WhatsAppGroupAdder";
+import WhatsAppGroupCreator from "./WhatsAppGroupCreator";
 import EmailAccounts from "./EmailAccounts";
 import Settings from "./Settings";
 
@@ -32,6 +44,7 @@ const Home = () => {
     <Route path="/dashbord" element={<Dashboard />} />
     <Route path="/tools" element={<Tools />} />
     <Route path="/gmap-data" element={<GoogleMapData />} />
+    <Route path="/gmap-grid" element={<GoogleMapGrid />} />
     <Route path="/web-data" element={<WebData />} />
     <Route path="/email-finder" element={<EmailFinder />} />
     <Route path="/social-enricher" element={<SocialEnricher />} />
@@ -45,6 +58,17 @@ const Home = () => {
     <Route path="/whatsapp-connect" element={<WhatsAppConnect />} />
     <Route path="/whatsapp-filter" element={<WhatsAppNumberFilter />} />
     <Route path="/whatsapp-sender" element={<WhatsAppSender />} />
+    <Route path="/whatsapp-groups" element={<WhatsAppGroupGrabber />} />
+    <Route path="/whatsapp-polls" element={<WhatsAppPollAnalytics />} />
+    <Route path="/whatsapp-autoresponder" element={<WhatsAppAutoResponder />} />
+    <Route path="/whatsapp-backup" element={<WhatsAppChatBackup />} />
+    <Route path="/whatsapp-warmer" element={<WhatsAppWarmer />} />
+    <Route path="/whatsapp-active-members" element={<WhatsAppActiveMembers />} />
+    <Route path="/whatsapp-web-links" element={<WhatsAppWebLinks />} />
+    <Route path="/whatsapp-group-finder" element={<WhatsAppGroupFinder />} />
+    <Route path="/whatsapp-group-joiner" element={<WhatsAppGroupJoiner />} />
+    <Route path="/whatsapp-group-adder" element={<WhatsAppGroupAdder />} />
+    <Route path="/whatsapp-group-creator" element={<WhatsAppGroupCreator />} />
     <Route path="/email-accounts" element={<EmailAccounts />} />
     <Route path="/settings" element={<Settings />} />
       </Routes>

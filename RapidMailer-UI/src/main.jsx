@@ -4,6 +4,7 @@ import App from "./App.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { GoogleMapDataProvider } from "./context/MapDataContext.jsx";
+import { MapGridProvider } from "./context/MapGridContext.jsx";
 import { WebDataProvider } from "./context/WebDataContext.jsx";
 import { EmailFinderProvider } from "./context/EmailFinderContext.jsx";
 import { SocialEnricherProvider } from "./context/SocialEnricherContext.jsx";
@@ -22,33 +23,35 @@ createRoot(document.getElementById("root")).render(
   <ErrorBoundary>
   <BrowserRouter>
     <GoogleMapDataProvider>
-      <WebDataProvider>
-        <EmailFinderProvider>
-          <SocialEnricherProvider>
-            <SidebarExpandProvider>
-              <EmailsVerifyProvider>
-                <EmailsSendProvider>
-                  <EmailProvider>
-                    <UploadedListsProvider>
-                      <TechDetectorProvider>
-                        <WebsiteAuditProvider>
-                          <WhatsAppProvider>
-                            <EmailAccountsProvider>
-                              <SettingsProvider>
-                                <App />
-                              </SettingsProvider>
-                            </EmailAccountsProvider>
-                          </WhatsAppProvider>
-                        </WebsiteAuditProvider>
-                      </TechDetectorProvider>
-                    </UploadedListsProvider>
-                  </EmailProvider>
-                </EmailsSendProvider>
-              </EmailsVerifyProvider>
-            </SidebarExpandProvider>
-          </SocialEnricherProvider>
-        </EmailFinderProvider>
-      </WebDataProvider>
+      <MapGridProvider>
+        <WebDataProvider>
+          <EmailFinderProvider>
+            <SocialEnricherProvider>
+              <SidebarExpandProvider>
+                <EmailsVerifyProvider>
+                  <EmailsSendProvider>
+                    <EmailProvider>
+                      <UploadedListsProvider>
+                        <TechDetectorProvider>
+                          <WebsiteAuditProvider>
+                            <WhatsAppProvider>
+                              <EmailAccountsProvider>
+                                <SettingsProvider>
+                                  <App />
+                                </SettingsProvider>
+                              </EmailAccountsProvider>
+                            </WhatsAppProvider>
+                          </WebsiteAuditProvider>
+                        </TechDetectorProvider>
+                      </UploadedListsProvider>
+                    </EmailProvider>
+                  </EmailsSendProvider>
+                </EmailsVerifyProvider>
+              </SidebarExpandProvider>
+            </SocialEnricherProvider>
+          </EmailFinderProvider>
+        </WebDataProvider>
+      </MapGridProvider>
     </GoogleMapDataProvider>
   </BrowserRouter>
   </ErrorBoundary>
